@@ -38,17 +38,15 @@ func (a *Manager) GetFile (fileName string) *os.File {
 
 func (a *Manager) Read (blk Block, page Page) {
 	file := a.GetFile(blk.FileName);
-
-	file.Truncate(int64((blk.BlockNumber + 1) * a.BlockSize));
-	n, err := file.Seek(int64(blk.BlockNumber * a.BlockSize), 0);
-
-	if(err != nil) {
+	info, _ := file.Stat();
+	if(info.Size() < int64((blk.BlockNumber + 1) * a.BlockSize)) {
+		file.Truncate(int64((blk.BlockNumber + 1) * a.BlockSize));
+	}
+	n, err := file.Seek(int64(blk.BlockNumber * a.BlockSize), 0); if(err != nil) {
 		fmt.Println(n);
 		fmt.Println("when file.Seek(int64(blk.BlockNumber * a.BlockSize), 0) was occured, error generated: ");
 	}
-	read_n, err := file.ReadAt(page.Contents(), int64(blk.BlockNumber * a.BlockSize));
-
-	if(err != nil) {
+	read_n, err := file.Read(page.Contents()); if(err != nil) {
 		fmt.Println(read_n);
 		fmt.Println(err);
 		fmt.Println("file.Read(page.Contents());was occured, error occured: ");
@@ -59,7 +57,6 @@ func (a *Manager) Read (blk Block, page Page) {
 func (a *Manager) Write (blk Block, page Page) {
 	file := a.GetFile(blk.FileName);
 	// 第二引数0はファイルの先頭からのoffsetを示す
-	file.Truncate(int64((1+blk.BlockNumber) * a.BlockSize));
 	file.Seek(int64(blk.BlockNumber * a.BlockSize), 0);
 	file.Write(page.Contents());
 }
