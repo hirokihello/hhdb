@@ -1,9 +1,4 @@
 package dbFile
-// import (
-// 	"unicode/utf8"
-// )
-// 文字こーどの現状での必要性がなさそうなので放置
-
 import (
 	"encoding/binary"
 )
@@ -12,6 +7,8 @@ type PageI interface {
 	SetInt();
 	GetInt();
 	GetString();
+	Contents();
+	MaxLength();
 }
 
 type Page struct {
@@ -56,6 +53,15 @@ func (a Page) SetString (str string, offset int) {
 	}
 }
 
+func (a Page) MaxLength (str string) int {
+	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。
+	return len(str) + 4;
+}
+
+func (a Page) Contents () []byte {
+	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。
+	return a.ByteBuffer;
+}
 
 func CreatePage (size int) Page {
 	newBuff := make([]byte, size);

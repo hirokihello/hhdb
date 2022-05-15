@@ -33,7 +33,6 @@ func TestPageGetInt (t *testing.T) {
 	binary.LittleEndian.PutUint32(bs, 2147483647)
 	page := LoadBufferToPage(bs);
 
-	// t.Errorf(string(page.ByteBuffer));
 	if(len(page.ByteBuffer) > 4) {
 		t.Errorf("length of bytes is[%v]", len(page.ByteBuffer))
 	}
@@ -62,5 +61,35 @@ func TestPageSetString (t *testing.T) {
 
 	if(page.GetString(4) != "1234ABCD") {
 		t.Errorf("blk.ToString() = [%v], want: [%v]", page.GetString(4), "1234ABCD")
+	}
+}
+
+func TestManager (t *testing.T) {
+	file_manager := CreateManager("test_dir", 400);
+	block := Block{FileName: "test_block_2", BlockNumber: 2};
+	page_1 := CreatePage(400);
+	position_1 := 88;
+	page_1.SetString("abcdefggg", position_1);
+	size := page_1.MaxLength("abcdefggg");
+	position_2 := size + position_1;
+	page_1.SetInt(345, position_2);
+	file_manager.Write(block, page_1);
+
+	page_2 := CreatePage(400);
+	file_manager.Read(block, page_2);
+
+	if(page_1.GetInt(position_2) != 345) {
+		t.Errorf("page_1.GetInt(position_2) = [%v], want: [%v]", page_1.GetInt(position_2), "345")
+	}
+	if(page_1.GetString(position_1) != "abcdefggg") {
+		t.Errorf("page_1.GetString(position_1) = [%v], want: [%v]", page_1.GetString(position_2), "abcdefggg")
+	}
+
+	// page2についてのテストケースの追加
+	if(page_2.GetInt(position_2) != 345) {
+		t.Errorf("page_2.GetInt(position_2) = [%v], want: [%v]", page_2.GetInt(position_2), "345")
+	}
+	if(page_2.GetString(position_1) != "abcdefggg") {
+		t.Errorf("page_2.GetString(position_1) = [%v], want: [%v]", page_2.GetString(position_1), "abcdefggg")
 	}
 }

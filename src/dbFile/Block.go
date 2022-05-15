@@ -5,6 +5,9 @@ import (
 	"crypto/sha256"
 )
 
+// これはページではないし、メモリと直接関係するような構造体でもない
+// ただfileNameとblockNumber(論理的ブロック数)を持つだけ。
+// どのblockかという識別用の構造体にすぎない
 type Block struct {
 	FileName string;
 	BlockNumber int;
