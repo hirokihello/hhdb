@@ -48,7 +48,6 @@ func (a *Manager) Read (blk Block, page Page) {
 	}
 	read_n, err := file.Read(page.Contents()); if(err != nil) {
 		fmt.Println(read_n);
-		fmt.Println(err);
 		fmt.Println("file.Read(page.Contents());was occured, error occured: ");
 	}
 }
