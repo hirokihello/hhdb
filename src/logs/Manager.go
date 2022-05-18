@@ -19,6 +19,7 @@ func CreateLogManager (manager *files.Manager, fileName string) Manager {
 	page := files.CreatePage(manager.BlockSize);
 	// ファイルがいっぱいかどうかを返す。
 	// なぜintなのか不明すぎる...
+	// 普通にboolでええやん...
 	length := manager.Length(fileName);
 	var block files.Block;
 	if(length == 0) {
