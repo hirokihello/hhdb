@@ -1,4 +1,4 @@
-package dbFile;
+package files;
 
 import (
 	"os"
@@ -14,6 +14,7 @@ type Manager struct {
 type ManagerI interface {
 	Write();
 	Read();
+	Int();
 }
 
 func (a *Manager) GetFile (fileName string) *os.File {
@@ -36,6 +37,7 @@ func (a *Manager) GetFile (fileName string) *os.File {
 	return f;
 }
 
+// fileの内容をページに書き込む
 func (a *Manager) Read (blk Block, page Page) {
 	file := a.GetFile(blk.FileName);
 	info, _ := file.Stat();
@@ -58,6 +60,13 @@ func (a *Manager) Write (blk Block, page Page) {
 	// 第二引数0はファイルの先頭からのoffsetを示す
 	file.Seek(int64(blk.BlockNumber * a.BlockSize), 0);
 	file.Write(page.Contents());
+}
+// writeはpageの内容をfileに書き込む
+func (a *Manager) Length (fileName string) int {
+	file := a.GetFile(fileName);
+	info, _ := file.Stat();
+
+	return int(info.Size()) / a.BlockSize;
 }
 
 func CreateManager (directoryPath string, blockSize int) Manager {

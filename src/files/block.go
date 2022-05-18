@@ -1,4 +1,4 @@
-package dbFile;
+package files;
 import("strconv")
 
 import (
@@ -14,9 +14,9 @@ type Block struct {
 }
 
 type BlockI interface {
-	IsEqual();
-	ToString();
-	HashCode();
+	IsEqual() bool;
+	ToString() string;
+	HashCode() string;
 }
 
 func(a Block) IsEqual (b Block) bool {
@@ -27,7 +27,7 @@ func (a Block) ToString () string {
 	return "filename: " + a.FileName + ", block: " + strconv.Itoa(a.BlockNumber);
 }
 
-func(a Block) HashCode ()string {
+func(a Block) HashCode () string {
 	buff := []byte(a.ToString());
 	p := sha256.Sum256(buff);
 	return string(p[:]);

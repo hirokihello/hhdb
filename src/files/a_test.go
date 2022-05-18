@@ -1,4 +1,4 @@
-package dbFile;
+package files;
 
 import "testing";
 import (
