@@ -16,10 +16,15 @@ type Page struct {
 
 // マジックナンバー４使いがち...
 
-func (a Page) GetString (offset int) string {
+func (a *Page) GetBytes (offset int) []byte {
 	size := a.GetInt(offset);
 	start := offset+4;
-	return string(a.ByteBuffer[start:start+size]);
+	return a.ByteBuffer[start:start+size]
+}
+
+func (a Page) GetString (offset int) string {
+	buf := a.GetBytes(offset)
+	return string(buf);
 }
 
 func (a Page) GetInt (offset int) int {
@@ -45,6 +50,7 @@ func (a Page) SetString (str string, offset int) {
 	bs := []byte(str);
 	a.SetBytes(bs, offset);
 }
+
 func (a *Page) SetBytes(bs []byte, offset int) {
 	a.SetInt(uint32(len(bs)), offset);
 
@@ -54,6 +60,8 @@ func (a *Page) SetBytes(bs []byte, offset int) {
 	}
 }
 
+// stringの長さ自体を返す
+// public static int maxLength(int strlen) の命名を変更した
 func MaxLengthOfStringOnPage (str string) int {
 	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。
 	return len(str) + 4;

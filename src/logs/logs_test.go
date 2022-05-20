@@ -3,6 +3,7 @@ package logs;
 import (
 	"testing"
 	"strconv"
+	"fmt"
 );
 
 import "github.com/hirokihello/hhdb/src/files"
@@ -16,7 +17,17 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func showLogRecords () {}
+func showLogRecords () {
+	itr := *logManager.Iterator();
+	for itr.HasNext() {
+		records := itr.Next();
+		page := files.LoadBufferToPage(records);
+		s := page.GetString(0);
+		npos := files.MaxLengthOfStringOnPage(s);
+		value := page.GetInt(npos);
+		fmt.Println("[" + s + ", " + strconv.Itoa(value) + "]");
+	}
+}
 
 func createLogRecords (num int) {
 	str := "record: " + strconv.Itoa(num);

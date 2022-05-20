@@ -22,8 +22,9 @@ func (lm *Manager) Flush(lsn int) {
 	}
 }
 
-func (lm *Manager) Iterator() {
+func (lm *Manager) Iterator() *Iterator {
 	lm.flush();
+	return CreateIter(lm.FileManager, lm.CurrentBlock);
 }
 
 func (lm *Manager) appendNewBlock() *files.Block {

@@ -10,7 +10,7 @@ type Iterator struct {
 	CurrentPosition int
 }
 
-func (itr *Iterator)moveToBlock (block files.Block) {
+func (itr *Iterator) moveToBlock (block files.Block) {
 	itr.FileManager.Read(block, itr.Page);
 	itr.Boundary = itr.Page.GetInt(0);
 	itr.CurrentPosition = itr.Boundary;
@@ -22,8 +22,14 @@ func (itr *Iterator) HasNext() bool {
 
 func (itr *Iterator) Next() []byte {
 	if(itr.CurrentPosition == itr.FileManager.BlockSize) {
-		block
+		new_block := files.Block{BlockNumber: itr.Block.BlockNumber - 1, FileName: itr.Block.FileName};
+		itr.moveToBlock(new_block);
 	}
+
+	records := itr.Page.GetBytes(itr.CurrentPosition);
+	itr.CurrentPosition += 4 + len(records);
+
+	return records;
 }
 
 func CreateIter (fileManager files.Manager, block files.Block) *Iterator {
