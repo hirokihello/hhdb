@@ -8,7 +8,6 @@ type PageI interface {
 	GetInt();
 	GetString();
 	Contents();
-	MaxLength();
 }
 
 type Page struct {
@@ -44,8 +43,10 @@ func (a Page) SetInt (num uint32, offset int) {
 
 func (a Page) SetString (str string, offset int) {
 	bs := []byte(str);
-	length := len(bs);
-	a.SetInt(uint32(length), offset);
+	a.SetBytes(bs, offset);
+}
+func (a *Page) SetBytes(bs []byte, offset int) {
+	a.SetInt(uint32(len(bs)), offset);
 
 	offset += 4;
 	for index, value := range bs {
@@ -53,7 +54,7 @@ func (a Page) SetString (str string, offset int) {
 	}
 }
 
-func (a Page) MaxLength (str string) int {
+func MaxLengthOfStringOnPage (str string) int {
 	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。
 	return len(str) + 4;
 }
