@@ -53,20 +53,19 @@ func (lm *Manager) Append(records []byte) {
 }
 
 // 初期化で使うメソッド。色々と管理しているので重要
-func CreateLogManager (manager *files.Manager, fileName string) *Manager {
-	page := files.CreatePage(manager.BlockSize);
+func CreateLogManager (fileManager *files.Manager, fileName string) *Manager {
+	page := files.CreatePage(fileManager.BlockSize);
 	// ファイルがいっぱいかどうかを返す。
 	// なぜintなのか不明すぎる...
 	// 普通にboolでええやん...
-	length := manager.Length(fileName);
-	var block files.Block;
-	logManager := Manager{FileManager: *manager, LogFile: fileName, LogPage: page, LatestLsn: 0, LastSavedLsn: 0};
-	if(length == 0) {
-		logManager.CurrentBlock = *logManager.appendNewBlock();
-	} else {
-		block = files.Block{FileName: fileName, BlockNumber: length - 1}
-		manager.Read(block, logManager.LogPage);
-		logManager.CurrentBlock = block;
+	length := fileManager.Length(fileName);
+	block := files.Block{FileName: fileName, BlockNumber: length - 1};
+	logManager := Manager{CurrentBlock: block, FileManager: *fileManager, LogFile: fileName, LogPage: page, LatestLsn: 0, LastSavedLsn: 0};
+	fileManager.Read(block, logManager.LogPage);
+
+	// logfileが存在しないときの初期化処理。
+	if(length == 1 && logManager.LogPage.GetInt(0) == 0) {
+		logManager.LogPage.SetInt(uint32(fileManager.BlockSize), 0);
 	}
 	return &logManager;
 }

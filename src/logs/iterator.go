@@ -17,6 +17,7 @@ func (itr *Iterator) moveToBlock (block *files.Block) {
 	itr.Boundary = itr.Page.GetInt(0);
 	itr.CurrentPosition = itr.Boundary;
 
+	fmt.Println(itr.Block.BlockNumber);
 	itr.Block = *block;
 }
 
@@ -42,6 +43,5 @@ func CreateIter (fileManager files.Manager, block files.Block) *Iterator {
 	itr := Iterator{FileManager: fileManager, Block: block, Page: page, Boundary: 0, CurrentPosition: 0};
 	itr.moveToBlock(&block)
 
-	fmt.Println(itr.Block.BlockNumber);
 	return &itr
 }

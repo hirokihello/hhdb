@@ -29,9 +29,9 @@ func (a *Manager) GetFile (fileName string) *os.File {
 		if err2 != nil {
 			newFile, _ := os.Create(a.DbDirectory +"/" + fileName);
 			file = newFile;
+			file.Write(make([]byte, a.BlockSize));
+			file.Sync();
 		}
-
-		file.Write(make([]byte, a.BlockSize));
 		file.Seek(0, 0);
 		file.Sync();
 		a.OpenFiles[fileName] = file;
@@ -45,10 +45,6 @@ func (a *Manager) GetFile (fileName string) *os.File {
 func (a *Manager) Read (blk Block, page Page) {
 	a.mu.Lock();
 	file := a.GetFile(blk.FileName);
-	info, _ := file.Stat();
-	if(info.Size() < int64((blk.BlockNumber + 1) * a.BlockSize)) {
-		file.Truncate(int64((blk.BlockNumber + 1) * a.BlockSize));
-	}
 	n, err := file.Seek(int64(blk.BlockNumber * a.BlockSize), 0); if(err != nil) {
 		fmt.Println(n);
 		fmt.Println("when file.Seek(int64(blk.BlockNumber * a.BlockSize), 0) was occured, error generated: ");
@@ -65,6 +61,10 @@ func (a *Manager) Read (blk Block, page Page) {
 func (a *Manager) Write (blk Block, page Page) {
 	a.mu.Lock();
 	file := a.GetFile(blk.FileName);
+	info, _ := file.Stat();
+	if(info.Size() < int64((blk.BlockNumber + 1) * a.BlockSize)) {
+		file.Truncate(int64((blk.BlockNumber + 1) * a.BlockSize));
+	}
 	// 第二引数0はファイルの先頭からのoffsetを示す
 	file.Seek(int64(blk.BlockNumber * a.BlockSize), 0);
 	file.Write(page.Contents());
@@ -72,13 +72,11 @@ func (a *Manager) Write (blk Block, page Page) {
 	a.mu.Unlock();
 }
 
+// あくまでファイルのブロックの数を返す。
+// 現時点の最終ブロックはLength - 1で計算できる
 func (a *Manager) Length (fileName string) int {
 	file := a.GetFile(fileName);
 	info, _ := file.Stat();
-
-	if(int(info.Size()) < a.BlockSize) {
-		return 0;
-	}
 
 	return int(int(info.Size())/ a.BlockSize);
 }
@@ -88,9 +86,10 @@ func (mgr *Manager) Append (fileName string) *Block {
 	mgr.mu.Lock();
 	// ここのlengthはfileNameのサイズじゃない。ファイルに含まれるブロックの数を返す。
 	blockNumber := mgr.Length(fileName);
-	block := Block{FileName: fileName, BlockNumber: blockNumber-1};
+	// lengthhが現時点の最終ブロック+1nのblockNumberであるので新規作成で作るのはそのファイルのlengthを直接入れれば良い
+	block := Block{FileName: fileName, BlockNumber: blockNumber};
 	file := mgr.GetFile(fileName);
-	file.Truncate(int64((1 + blockNumber) * mgr.BlockSize));
+	file.Truncate(int64(blockNumber * mgr.BlockSize));
 
 	file.Sync();
 	mgr.mu.Unlock();
