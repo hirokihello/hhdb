@@ -30,8 +30,8 @@ func (lm *Manager) Iterator() *Iterator {
 func (lm *Manager) appendNewBlock() *files.Block {
 	block := lm.FileManager.Append(lm.LogFile);
 	lm.LogPage.SetInt(uint32(lm.FileManager.BlockSize), 0);
-	lm.FileManager.Write(block, lm.LogPage);
-	return &block;
+	lm.FileManager.Write(*block, lm.LogPage);
+	return block;
 }
 
 func (lm *Manager) Append(records []byte) {
@@ -53,7 +53,7 @@ func (lm *Manager) Append(records []byte) {
 }
 
 // 初期化で使うメソッド。色々と管理しているので重要
-func CreateLogManager (manager *files.Manager, fileName string) Manager {
+func CreateLogManager (manager *files.Manager, fileName string) *Manager {
 	page := files.CreatePage(manager.BlockSize);
 	// ファイルがいっぱいかどうかを返す。
 	// なぜintなのか不明すぎる...
@@ -68,5 +68,5 @@ func CreateLogManager (manager *files.Manager, fileName string) Manager {
 		manager.Read(block, logManager.LogPage);
 		logManager.CurrentBlock = block;
 	}
-	return logManager;
+	return &logManager;
 }

@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/hiroki/git/github.com/hirokihello/hhdb'
+go run ./client/main.go
+make: Leaving directory `/Users/hiroki/git/github.com/hirokihello/hhdb'
+ 

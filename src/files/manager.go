@@ -3,12 +3,14 @@ package files;
 import (
 	"os"
 	"fmt"
+	"sync"
 )
 
 type Manager struct {
 	DbDirectory string;
 	BlockSize int;
 	OpenFiles map[string] *os.File
+	mu sync.Mutex // guards
 }
 
 type ManagerI interface {
@@ -31,6 +33,7 @@ func (a *Manager) GetFile (fileName string) *os.File {
 
 		file.Write(make([]byte, a.BlockSize));
 		file.Seek(0, 0);
+		file.Sync();
 		a.OpenFiles[fileName] = file;
 		f = file;
 	}
@@ -40,6 +43,7 @@ func (a *Manager) GetFile (fileName string) *os.File {
 
 // 物理的なfileの内容をページに書き込む
 func (a *Manager) Read (blk Block, page Page) {
+	a.mu.Lock();
 	file := a.GetFile(blk.FileName);
 	info, _ := file.Stat();
 	if(info.Size() < int64((blk.BlockNumber + 1) * a.BlockSize)) {
@@ -53,40 +57,53 @@ func (a *Manager) Read (blk Block, page Page) {
 		fmt.Println(read_n);
 		fmt.Println("file.Read(page.Contents());was occured, error occured: ");
 	}
+	file.Sync();
+	a.mu.Unlock();
 }
 
 // writeはpageの内容を物理的なfileに書き込む
 func (a *Manager) Write (blk Block, page Page) {
+	a.mu.Lock();
 	file := a.GetFile(blk.FileName);
 	// 第二引数0はファイルの先頭からのoffsetを示す
 	file.Seek(int64(blk.BlockNumber * a.BlockSize), 0);
 	file.Write(page.Contents());
+	file.Sync();
+	a.mu.Unlock();
 }
 
 func (a *Manager) Length (fileName string) int {
 	file := a.GetFile(fileName);
 	info, _ := file.Stat();
 
-	return int(info.Size()) / a.BlockSize;
+	if(int(info.Size()) < a.BlockSize) {
+		return 0;
+	}
+
+	return int(int(info.Size())/ a.BlockSize);
 }
 
 // Appendは既存のファイルの最終block後ろにBlockSize分の領域を確保して、そこに割り当てたblockIdとfilenameを持つBlockを返してくれる
-func (a *Manager) Append (fileName string) Block {
+func (mgr *Manager) Append (fileName string) *Block {
+	mgr.mu.Lock();
 	// ここのlengthはfileNameのサイズじゃない。ファイルに含まれるブロックの数を返す。
-	blockNumber := a.Length(fileName);
-	block := Block{FileName: fileName, BlockNumber: blockNumber};
-	file := a.GetFile(fileName);
-	file.Truncate(int64(blockNumber * (a.BlockSize + 1)));
+	blockNumber := mgr.Length(fileName);
+	block := Block{FileName: fileName, BlockNumber: blockNumber-1};
+	file := mgr.GetFile(fileName);
+	file.Truncate(int64((1 + blockNumber) * mgr.BlockSize));
 
-	return block;
+	file.Sync();
+	mgr.mu.Unlock();
+	return &block;
 }
 
-func CreateManager (directoryPath string, blockSize int) Manager {
-	err := os.Mkdir(directoryPath, 0750)
-	if err != nil && !os.IsExist(err) {
+func CreateManager (directoryPath string, blockSize int) *Manager {
+	os.Mkdir(directoryPath, 0750)
+	// err := os.Mkdir(directoryPath, 0750)
+	// if err != nil && !os.IsExist(err) {
 		// tmp fileは削除したい
 		// defer os.RemoveAll(directoryPath);
-	}
+	// }
 
-	return Manager{DbDirectory: directoryPath, BlockSize: blockSize, OpenFiles: map[string] *os.File{}};
+	return &Manager{DbDirectory: directoryPath, BlockSize: blockSize, OpenFiles: map[string] *os.File{}};
 }

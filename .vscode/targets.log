@@ -1,0 +1,256 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.81
+# Copyright (C) 2006  Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.
+# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# This program built for i386-apple-darwin11.3.0
+
+# Make data base, printed on Sat May 21 02:26:53 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+GOENV_ROOT = /Users/hiroki/.goenv
+# environment
+VSCODE_LOG_NATIVE = false
+# environment
+NODENV_SHELL = fish
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# automatic
+@F = $(notdir $@)
+# makefile
+CURDIR := /Users/hiroki/git/github.com/hirokihello/hhdb
+# makefile
+SHELL = /bin/sh
+# environment
+VSCODE_NLS_CONFIG = {"locale":"ja","availableLanguages":{"*":"ja"},"_languagePackId":"f5b8523d60216379ef9ba6dc243eb093.ja","_translationsConfigFile":"/Users/hiroki/Library/Application Support/Code/clp/f5b8523d60216379ef9ba6dc243eb093.ja/tcf.json","_cacheRoot":"/Users/hiroki/Library/Application Support/Code/clp/f5b8523d60216379ef9ba6dc243eb093.ja","_resolvedLanguagePackCoreLocation":"/Users/hiroki/Library/Application Support/Code/clp/f5b8523d60216379ef9ba6dc243eb093.ja/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5","_corruptedFile":"/Users/hiroki/Library/Application Support/Code/clp/f5b8523d60216379ef9ba6dc243eb093.ja/corrupted.info","_languagePackSupport":true}
+# environment
+_ = /usr/bin/make
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# makefile (from `makefile', line 1)
+MAKEFILE_LIST :=  makefile
+# environment
+GOENV_SHELL = fish
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+__CFBundleIdentifier = com.microsoft.VSCode
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/qr/fbqt71ts3md3vr4xb9vp7k500000gn/T/vscode-ipc-0688a21a-e39f-4a28-a17e-d62c45415e7b.sock
+# environment
+VSCODE_CWD = /Users/hiroki/git/github.com/hirokihello/hhdb
+# environment
+GOPROXY = https://proxy.golang.org,direct
+# environment
+PATH = /Users/hiroki/.goenv/versions/1.18.0/bin:/Users/hiroki/.cargo/bin:/Users/hiroki/.nodenv/bin:/Users/hiroki/.nodenv/shims:/Users/hiroki/.goenv/shims:/Users/hiroki/.goenv/bin:.:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS
+# environment
+GOROOT = /Users/hiroki/.goenv/versions/1.18.0
+# environment
+GOPATH = /Users/hiroki/go/1.18.0
+# environment
+LaunchInstanceID = DE218BBA-A4BA-4834-B12B-4B5165D2E3E1
+# environment
+VSCODE_LOG_STACK = false
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+LDFLAGS = -L/usr/local/opt/libffi/lib
+# default
+.FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
+# environment
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.arqsIFVc54/Listeners
+# automatic
+%F = $(notdir $%)
+# environment
+DISPLAY = /private/tmp/com.apple.launchd.sTwXJo4l6N/org.macosforge.xquartz:0
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+PWD = /Users/hiroki/git/github.com/hirokihello/hhdb
+# environment
+PKG_CONFIG_PATH = /usr/local/opt/libffi/lib/pkgconfig
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+GOMODCACHE = /Users/hiroki/go/1.18.0/pkg/mod
+# environment
+HOME = /Users/hiroki
+# default
+MAKEFILEPATH := /Applications/Xcode.app/Contents/Developer/Makefiles
+# environment
+VSCODE_CLI = 1
+# environment
+VSCODE_CODE_CACHE_PATH = /Users/hiroki/Library/Application Support/Code/CachedData/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
+# environment
+LOGNAME = hiroki
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+XPC_FLAGS = 0x0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 3
+# default
+MAKE_VERSION := 3.81
+# environment
+USER = hiroki
+# makefile
+.DEFAULT_GOAL := run
+# environment
+TERM_SESSION_ID = 9F5678DE-EC1C-422C-AF27-7E046C86E2DF
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# default
+MAKE_COMMAND := /Applications/Xcode.app/Contents/Developer/usr/bin/make
+# environment
+TERM_PROGRAM = Apple_Terminal
+# default
+.VARIABLES := 
+# environment
+TMPDIR = /var/folders/qr/fbqt71ts3md3vr4xb9vp7k500000gn/T/
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /Users/hiroki/Library/Application Support/Code/1.67.2-main.sock
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+TERM_PROGRAM_VERSION = 445
+# environment
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.56741285.56741291.65FA4635-4FE7-4D19-B009-CAA2E60F751E
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# automatic
++F = $(notdir $+)
+# environment
+__CF_USER_TEXT_ENCODING = 0x1F5:0x1:0xE
+# environment
+COMMAND_MODE = unix2003
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# environment
+LC_ALL = C
+# environment
+SECURITYSESSIONID = 186a4
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# default
+.INCLUDE_DIRS = /usr/local/include
+# environment
+MAKELEVEL := 0
+# environment
+LANG = C
+# environment
+TERM = xterm-256color
+# environment
+VSCODE_PID = 1371
+# variable set hash-table stats:
+# Load=80/1024=8%, Rehash=0, Collisions=4/104=4%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 16777220, inode 55791827): 9 files, no impossibilities.
+
+# 9 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+all:
+#  Command-line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+test:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands to execute (from `makefile', line 5):
+	go test -v ./...
+	
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-05-21 02:07:13
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+run:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands to execute (from `makefile', line 2):
+	go run ./client/main.go
+	
+
+# files hash-table stats:
+# Load=6/1024=1%, Rehash=0, Collisions=0/18=0%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 1
+# # of strcache buffers: 1
+# strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
+# strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
+
+# Finished Make data base on Sat May 21 02:26:53 2022
+
+ 
+make: *** No rule to make target `all'.  Stop.
+

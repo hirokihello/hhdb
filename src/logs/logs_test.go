@@ -8,17 +8,20 @@ import (
 
 import "github.com/hirokihello/hhdb/src/files"
 
-var fileManager files.Manager;
+var fileManager *files.Manager;
 var logManager Manager;
 
 func TestMain(m *testing.M) {
 	fileManager = files.CreateManager("test_dir", 400);
-	logManager = CreateLogManager(&fileManager, "test_logfile");
+	logManager = *CreateLogManager(fileManager, "test_logfile");
+	fmt.Printf("blockN is")
+	fmt.Println(logManager.CurrentBlock.BlockNumber);
 	m.Run()
 }
 
 func showLogRecords () {
 	itr := *logManager.Iterator();
+	// for i := 0; itr.HasNext() && i < 100; i++ {
 	for itr.HasNext() {
 		records := itr.Next();
 		page := files.LoadBufferToPage(records);
@@ -37,17 +40,18 @@ func createLogRecords (num int) {
 	page := files.LoadBufferToPage(new_log)
 	page.SetString(str, 0);
 	page.SetInt(uint32(num), size);
-	logManager.Append(new_log);
+	logManager.Append(page.Contents());
 }
 
-func TestBlock (t *testing.T) {
-	for i := 0; i < 35; i++ {
+func TestLogManager (t *testing.T) {
+	for i := 0; i < 20; i++ {
 		createLogRecords(i);
 	}
 	showLogRecords()
-	for i := 35; i < 400; i++ {
-		createLogRecords(i);
-	}
-	logManager.Flush(65);
-	showLogRecords();
+	// for i := 35; i < 70; i++ {
+	// 	createLogRecords(i);
+	// }
+	fmt.Println("")
+	// logManager.Flush(65);
+	// showLogRecords();
 }

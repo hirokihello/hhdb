@@ -1,8 +1,8 @@
 package files;
-import("strconv")
 
 import (
 	"crypto/sha256"
+	"strconv"
 )
 
 // これはページではないし、メモリと直接関係するような構造体でもない
