@@ -6,7 +6,7 @@ import  (
 	"time"
 	"sync"
 )
-const MAX_TIME int = 10;
+const MAX_TIME int = 1;
 
 type Manager struct {
 	BufPool []*Buf;
@@ -17,12 +17,15 @@ type Manager struct {
 func (m *Manager) Available() int { return m.NumAvailableBuf }
 
 func (m *Manager) Unpin (buf *Buf) {
+	m.mu.Lock();
 	buf.UnPin();
 	if(!buf.IsPinned()) {
 		m.NumAvailableBuf++;
 		// clientに対してnotifyする必要がある
 		// NotifyAll();
 	}
+
+	m.mu.Unlock();
 }
 
 // bufを返す。
@@ -59,17 +62,17 @@ func (m *Manager) tryToPin (block *files.Block) (*Buf, bool) {
 			return &defaultBuf, true;
 		}
 		buf.AssignToBlock(*block);
+	} else {
+		// もしまだ割り当てたbufがpinされていなければこれからpinするので...
+		if !buf.IsPinned() {
+			m.NumAvailableBuf--;
+		}
+
+		// 新規にpinされている数をplusする
+		buf.Pin();
 	}
 
-	// もしまだ割り当てたbufがpinされていなければこれからpinするので...
-	if !buf.IsPinned() {
-		m.NumAvailableBuf--;
-	}
-
-	// 新規にpinされている数をplusする
-	buf.Pin();
-
-	return buf, err;
+	return buf, false;
 }
 
 func (m *Manager) FlushAll (txNum int) {

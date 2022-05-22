@@ -2,7 +2,6 @@ package bufs;
 
 import "github.com/hirokihello/hhdb/src/files"
 import "github.com/hirokihello/hhdb/src/logs"
-
 type Buf struct {
 	FileManger *files.Manager;
 	LogManger *logs.Manager;
@@ -32,8 +31,8 @@ func (buf *Buf) ModifyingTxNum () int {
 
 func (buf *Buf) Flush () {
 	if(buf.TxNum >= 0) {
-		buf.LogManger.Flush(buf.Lsn);
 		buf.FileManger.Write(buf.Block, *buf.Contents);
+		buf.LogManger.Flush(buf.Lsn);
 		buf.TxNum = -1;
 	}
 }
@@ -56,5 +55,6 @@ func (buf *Buf) Pin () {
 
 func CreateBuf (logManger *logs.Manager, fileManager *files.Manager) *Buf {
 	p := files.CreatePage(fileManager.BlockSize);
-	return &Buf{FileManger: fileManager, LogManger: logManger, Contents: &p, Pins: 0, TxNum: -1, Lsn: -1};
+	newBuf := Buf{FileManger: fileManager, LogManger: logManger, Contents: &p, Pins: 0, TxNum: -1, Lsn: -1};
+	return &newBuf;
 }
