@@ -10,6 +10,8 @@ type Manager struct {
 	LatestLsn int
 	LastSavedLsn int
 }
+// LastSavedLsnは物理diskに保存したlsnを保持している。
+// LatestLsnはメモリ上にあるlsnに保持している。
 
 func (lm *Manager) flush() {
 	lm.FileManager.Write(lm.CurrentBlock, lm.LogPage);
