@@ -1,2 +1,2 @@
 .vscode
-./**/**/test_dir/*
+src/*/test_dir
