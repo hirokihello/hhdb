@@ -1,5 +1,4 @@
-package buffers;
-
+package bufs;
 
 import "github.com/hirokihello/hhdb/src/files"
 import "github.com/hirokihello/hhdb/src/logs"
@@ -7,8 +6,7 @@ import  (
 	"time"
 	"sync"
 )
-
-const MAX_TIME int = 10000;
+const MAX_TIME int = 10;
 
 type Manager struct {
 	BufPool []*Buf;
@@ -34,16 +32,44 @@ func (m *Manager) Pin (block *files.Block) *Buf {
 	timeStamp := time.Now().Unix();
 	buf, err := m.tryToPin(block);
 
-	for err != true && !m.waitingTimeTooLong(int(timeStamp)) {
+	// 既存のものが取得できていないかつ時間がかかっていなければ
+	for err != false && !m.waitingTimeTooLong(int(timeStamp)) {
 		buf, err = m.tryToPin(block);
 	}
 
 	m.mu.Unlock();
+	// 問題が特に起きてなければbufを返す
 	if(err != true) {
 		return buf;
 	} else {
 		panic("deadlock occurred")
 	}
+}
+
+// 成功したらそのBufを返す。
+// 失敗したら初期化状態のbufferとerr = trueを返す。
+func (m *Manager) tryToPin (block *files.Block) (*Buf, bool) {
+	buf, err := m.findExistingBuffer(block);
+
+	if(err != false) {
+		buf, err = m.chooseUnPinnedBuffer();
+		if(err != false) {
+			// すべてのbufがpinされていて新規に割り当てられない状態
+			defaultBuf := Buf{};
+			return &defaultBuf, true;
+		}
+		buf.AssignToBlock(*block);
+	}
+
+	// もしまだ割り当てたbufがpinされていなければこれからpinするので...
+	if !buf.IsPinned() {
+		m.NumAvailableBuf--;
+	}
+
+	// 新規にpinされている数をplusする
+	buf.Pin();
+
+	return buf, err;
 }
 
 func (m *Manager) FlushAll (txNum int) {
@@ -87,31 +113,6 @@ func (m *Manager) chooseUnPinnedBuffer() (*Buf, bool) {
 	return &defaultBuf, true;
 }
 
-// 成功したらそのBufを返す。
-// 失敗したら初期化状態のbufferとerr = trueを返す。
-func (m *Manager) tryToPin (block *files.Block) (*Buf, bool) {
-	buf, err := m.findExistingBuffer(block);
-
-	if(err != false) {
-		buf, err = m.chooseUnPinnedBuffer();
-		if(err != false) {
-			// すべてのbufがpinされていて新規に割り当てられない状態
-			defaultBuf := Buf{};
-			return &defaultBuf, true;
-		}
-		buf.AssignToBlock(*block);
-	}
-
-	// もしまだ割り当てたbufがpinされていなければこれからpinするので...
-	if !buf.IsPinned() {
-		m.NumAvailableBuf--;
-	}
-
-	// 新規にpinされている数をplusする
-	buf.Pin();
-
-	return buf, err;
-}
 
 func CreateManager (bufN int, logManager *logs.Manager, filesManager *files.Manager) *Manager {
 	bufPool := make([]*Buf, bufN);

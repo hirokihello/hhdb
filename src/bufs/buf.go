@@ -1,4 +1,4 @@
-package buffers;
+package bufs;
 
 import "github.com/hirokihello/hhdb/src/files"
 import "github.com/hirokihello/hhdb/src/logs"

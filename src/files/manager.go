@@ -45,12 +45,18 @@ func (a *Manager) GetFile (fileName string) *os.File {
 func (a *Manager) Read (blk Block, page Page) {
 	a.mu.Lock();
 	file := a.GetFile(blk.FileName);
+	info, _ := file.Stat();
+	if(int(info.Size()) < a.BlockSize * (blk.BlockNumber + 1)) {
+		file.Truncate(int64((blk.BlockNumber + 1) * a.BlockSize));
+	}
+
 	n, err := file.Seek(int64(blk.BlockNumber * a.BlockSize), 0); if(err != nil) {
 		fmt.Println(n);
 		fmt.Println("when file.Seek(int64(blk.BlockNumber * a.BlockSize), 0) was occured, error generated: ");
 	}
 	read_n, err := file.Read(page.Contents()); if(err != nil) {
 		fmt.Println(read_n);
+		fmt.Println(err);
 		fmt.Println("file.Read(page.Contents());was occured, error occured: ");
 	}
 	file.Sync();
