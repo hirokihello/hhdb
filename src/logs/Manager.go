@@ -55,7 +55,7 @@ func (lm *Manager) Append(records []byte) {
 }
 
 // 初期化で使うメソッド。色々と管理しているので重要
-func CreateLogManager (fileManager *files.Manager, fileName string) *Manager {
+func CreateManager (fileManager *files.Manager, fileName string) *Manager {
 	page := files.CreatePage(fileManager.BlockSize);
 	// ファイルがいっぱいかどうかを返す。
 	// なぜintなのか不明すぎる...

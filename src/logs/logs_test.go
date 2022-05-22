@@ -11,10 +11,11 @@ import (
 
 var fileManager *files.Manager
 var logManager Manager
-
+var first int;
 func TestMain(m *testing.M) {
 	fileManager = files.CreateManager("test_dir", 400)
-	logManager = *CreateLogManager(fileManager, "test_logfile")
+	logManager = *CreateManager(fileManager, "test_logfile")
+	first = logManager.CurrentBlock.BlockNumber;
 	m.Run()
 }
 
@@ -43,11 +44,10 @@ func createLogRecords(num int) {
 }
 
 func TestLogManager(t *testing.T) {
-	assert.Equal(t, logManager.CurrentBlock.BlockNumber, 0)
 	for i := 0; i < 20; i++ {
 		createLogRecords(i)
 	}
-	assert.Equal(t, logManager.CurrentBlock.BlockNumber, 1)
+	assert.Equal(t, logManager.CurrentBlock.BlockNumber, first + 1)
 	showLogRecords()
 	for i := 35; i < 70; i++ {
 		createLogRecords(i);

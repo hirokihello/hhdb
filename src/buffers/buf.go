@@ -38,6 +38,7 @@ func (buf *Buf) Flush () {
 	}
 }
 
+// 新規でbufに格納したいblockがくると、既存のものをflushして新しいblockに置き換える
 func (buf *Buf) AssignToBlock (block files.Block) {
 	buf.Flush();
 	buf.Block = block;
