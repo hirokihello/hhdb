@@ -10,7 +10,7 @@ import (
 // どのblockかという識別用の構造体にすぎない
 type Block struct {
 	FileName string;
-	BlockNumber int;
+	Number int;
 }
 
 type BlockI interface {
@@ -20,11 +20,11 @@ type BlockI interface {
 }
 
 func(a Block) IsEqual (b Block) bool {
-	return a.FileName == b.FileName && a.BlockNumber == b.BlockNumber;
+	return a.FileName == b.FileName && a.Number == b.Number;
 }
 
 func (a Block) ToString () string {
-	return "filename: " + a.FileName + ", block: " + strconv.Itoa(a.BlockNumber);
+	return "filename: " + a.FileName + ", block: " + strconv.Itoa(a.Number);
 }
 
 func(a Block) HashCode () string {

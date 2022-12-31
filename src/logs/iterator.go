@@ -1,47 +1,47 @@
-package logs;
+package logs
 
-import "fmt"
+import (
+	"fmt"
 
-import "github.com/hirokihello/hhdb/src/files"
+	"github.com/hirokihello/hhdb/src/files"
+)
 
 type Iterator struct {
-	FileManager files.Manager
-	Block files.Block
-	Page files.Page
-	Boundary int
-	CurrentPosition int
-}
-
-func (itr *Iterator) moveToBlock (block *files.Block) {
-	itr.FileManager.Read(*block, itr.Page);
-	itr.Boundary = itr.Page.GetInt(0);
-	itr.CurrentPosition = itr.Boundary;
-
-	fmt.Println(itr.Block.BlockNumber);
-	itr.Block = *block;
+	fileManager     *files.Manager
+	block           files.Block
+	Page            files.Page
+	Boundary        int
+	currentPosition int
 }
 
 func (itr *Iterator) HasNext() bool {
-	return itr.CurrentPosition < itr.FileManager.BlockSize || itr.Block.BlockNumber > 0;
+	return itr.currentPosition < itr.fileManager.BlockSize || itr.block.Number > 0
 }
 
 func (itr *Iterator) Next() []byte {
-	if(itr.CurrentPosition == itr.FileManager.BlockSize) {
-		new_block := files.Block{BlockNumber: itr.Block.BlockNumber - 1, FileName: itr.Block.FileName};
-		itr.moveToBlock(&new_block);
+	if itr.currentPosition == itr.fileManager.BlockSize {
+		itr.block = files.Block{Number: itr.block.Number - 1, FileName: itr.block.FileName}
+		itr.moveToBlock(&itr.block)
 	}
+	fmt.Println(itr.block.Number);
+	fmt.Println(itr.currentPosition);
 
-	records := itr.Page.GetBytes(itr.CurrentPosition);
-	itr.CurrentPosition += 4 + len(records);
-
-	return records;
+	records := itr.Page.GetBytes(itr.currentPosition)
+	itr.currentPosition += 4 + len(records)
+	return records
 }
 
-func CreateIter (fileManager files.Manager, block files.Block) *Iterator {
-	b := make([]byte, fileManager.BlockSize);
-	page := files.LoadBufferToPage(b);
-	itr := Iterator{FileManager: fileManager, Block: block, Page: page, Boundary: 0, CurrentPosition: 0};
+func createLogIterator(fileManager *files.Manager, block files.Block) *Iterator {
+	b := make([]byte, fileManager.BlockSize)
+	page := files.LoadBufferToPage(b)
+	itr := Iterator{fileManager: fileManager, block: block, Page: page, Boundary: 0, currentPosition: 0}
 	itr.moveToBlock(&block)
 
 	return &itr
+}
+
+func (itr *Iterator) moveToBlock(block *files.Block) {
+	itr.fileManager.Read(*block, itr.Page)
+	itr.Boundary = itr.Page.GetInt(0)
+	itr.currentPosition = itr.Boundary
 }

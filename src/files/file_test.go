@@ -7,7 +7,7 @@ import (
 )
 
 func TestBlock(t *testing.T) {
-	blk := Block{FileName: "testBlockName", BlockNumber: 1}
+	blk := Block{FileName: "testBlockName", Number: 1}
 	if blk.ToString() != "filename: testBlockName, block: 1" {
 		t.Errorf("blk.ToString() = [%v], want: [%v]", blk.ToString(), "filename: testBlockName, block: 1")
 	}
@@ -46,7 +46,7 @@ func TestPgeSetInt(t *testing.T) {
 	bs := []byte("fasjfauifnauifnwefbwebfiwbvvfavvdavav")
 	page := LoadBufferToPage(bs)
 
-	page.SetInt(1234, 4)
+	page.SetInt(4, 1234)
 
 	if page.GetInt(4) != 1234 {
 		t.Errorf("blk.ToString() = [%v], want: [%v]", page.GetInt(4), 1234)
@@ -66,13 +66,13 @@ func TestPageSetString(t *testing.T) {
 
 func TestManager(t *testing.T) {
 	file_manager := CreateManager("test_dir", 400)
-	block := Block{FileName: "test_block_2", BlockNumber: 2}
+	block := Block{FileName: "test_block_2", Number: 2}
 	page_1 := CreatePage(400)
 	position_1 := 88
 	page_1.SetString("abcdefggg", position_1)
 	size := MaxLengthOfStringOnPage("abcdefggg")
 	position_2 := size + position_1
-	page_1.SetInt(345, position_2)
+	page_1.SetInt(position_2, 345)
 	file_manager.Write(block, page_1)
 
 	page_2 := CreatePage(400)
