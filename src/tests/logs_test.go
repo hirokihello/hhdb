@@ -13,7 +13,7 @@ import (
 var testLogManager *logs.Manager
 
 func TestLogManager(t *testing.T) {
-	database := db.CreateDB("test_dir", 400)
+	database := db.CreateDB("test_dir", 400, 3)
 	testLogManager = database.LogManager;
 	createRecords(1, 35);
 	printLogRecords("printing...");
