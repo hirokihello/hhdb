@@ -18,7 +18,7 @@ func TestLogManager(t *testing.T) {
 	createRecords(1, 35);
 	printLogRecords("printing...");
 	createRecords(36, 70);
-	testLogManager.Flush(65);
+	testLogManager.Flush(70);
 	printLogRecords("printing...");
 }
 
