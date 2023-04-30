@@ -69,7 +69,7 @@ func (a *Page) SetBytes(bs []byte, offset int) {
 	}
 }
 
-// stringの長さ + 4 bytes (文字列の大きさを表す先頭の長さを足した値を返却する)
+// stringの長さ + 4 bytes (文字列の大きさを表す)
 // public static int maxLength(int strlen) の命名を変更した
 func MaxLengthOfStringOnPage (str string) int {
 	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。

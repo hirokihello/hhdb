@@ -1,8 +1,6 @@
 package logs
 
 import (
-	"fmt"
-
 	"github.com/hirokihello/hhdb/src/files"
 )
 
@@ -30,19 +28,20 @@ type ManagerInterface interface {
 func CreateManager(fileManager *files.Manager, logFile string) *Manager {
 	// ログ用の Page を作成する
 	logPage := files.CreatePage(fileManager.BlockSize)
+
+	// このメソッドの副作用でファイルが強制的に作成されてしまう
 	logFileBlockSize := fileManager.FileBlockLength(logFile)
-	var block files.Block
+	// そのファイルの最後のブロックを取得
+	block := files.Block{FileName: logFile, Number: logFileBlockSize - 1}
+	// 最後のブロックをページに読み込んでおく
+	fileManager.Read(block, logPage)
+
 	// まだ書き込まれていない場合
-	if logFileBlockSize == 0 {
-		block = *fileManager.Append(logFile)
+	if logPage.GetInt(0) == 0 {
+		// block = *fileManager.Append(logFile)
 		logPage.SetInt(0, uint32(fileManager.BlockSize))
 		fileManager.Write(block, logPage)
 		// すでに書き込まれている場合
-	} else {
-		// そのファイルの最後のブロックを取得
-		block = files.Block{FileName: logFile, Number: logFileBlockSize - 1}
-		// 最後のブロックをページに読み込んでおく
-		fileManager.Read(block, logPage)
 	}
 
 	return &Manager{
@@ -77,9 +76,9 @@ func (manager *Manager) Append(logRecord []byte) int {
 		manager.flush()
 
 		// 新しいブロックの作成と、ディスクへの書き込み
-		block := *manager.fileManager.Append(manager.logFile)
+		manager.currentBlock = *manager.fileManager.Append(manager.logFile)
 		manager.logPage.SetInt(0, uint32(manager.fileManager.BlockSize))
-		manager.fileManager.Write(block, manager.logPage)
+		manager.fileManager.Write(manager.currentBlock, manager.logPage)
 
 		// boundary を新しくロードしたページの先頭の int に変更
 		boundary = manager.logPage.GetInt(0)
@@ -104,7 +103,6 @@ func (manager *Manager) Iterator() *Iterator {
 
 // page の内容をファイルに書き込む
 func (manager *Manager) flush() {
-	fmt.Println("saved!!!!!!")
 	// ファイルマネージャーを用いて、現在のログページの内容を、ファイルに書き込み
 	manager.fileManager.Write(manager.currentBlock, manager.logPage)
 	// 最後に保存したログを最新のものに更新

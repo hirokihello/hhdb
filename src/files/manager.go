@@ -13,13 +13,6 @@ type Manager struct {
 	mu          sync.Mutex // guards
 }
 
-type ManagerI interface {
-	Write()
-	Read()
-	Int()
-	Append()
-}
-
 func (manager *Manager) GetFile(fileName string) *os.File {
 	// ここで使ってるファイルは基本的にblkやpageの単位のファイルと異なる....!!
 	// blkやpageがどのように作られるのかはまた別の話

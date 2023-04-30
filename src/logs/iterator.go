@@ -11,7 +11,7 @@ type Iterator struct {
 	block           files.Block
 	Page            files.Page
 	Boundary        int
-	currentPosition int
+	currentPosition int // 現在の position
 }
 
 func (itr *Iterator) HasNext() bool {
@@ -19,12 +19,11 @@ func (itr *Iterator) HasNext() bool {
 }
 
 func (itr *Iterator) Next() []byte {
-	if itr.currentPosition == itr.fileManager.BlockSize {
+	for itr.currentPosition == itr.fileManager.BlockSize {
 		itr.block = files.Block{Number: itr.block.Number - 1, FileName: itr.block.FileName}
 		itr.moveToBlock(&itr.block)
+		fmt.Println(itr.block.Number)
 	}
-	fmt.Println(itr.block.Number);
-	fmt.Println(itr.currentPosition);
 
 	records := itr.Page.GetBytes(itr.currentPosition)
 	itr.currentPosition += 4 + len(records)
