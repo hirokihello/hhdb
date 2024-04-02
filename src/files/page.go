@@ -15,7 +15,6 @@ type Page struct {
 	ByteBuffer []byte;
 }
 
-// to do 最初の 4 bytes をなんでいじっているのか。
 
 // 1 byte
 func (a *Page) GetBytes (offset int) []byte {
@@ -87,6 +86,7 @@ func CreatePage (size int) Page {
 	return Page{ByteBuffer: newBuff};
 }
 
+// buffer を page の単位で扱えるようにする
 func LoadBufferToPage (initialBytes []byte) Page {
 	return Page{ByteBuffer: initialBytes}
 }
