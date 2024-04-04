@@ -7,6 +7,7 @@ import (
 )
 
 type Manager struct {
+	ManagerI
 	DbDirectory string // create されるときに引数で渡される
 	BlockSize   int    // 1 block の byte 数
 	OpenFiles   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
@@ -15,6 +16,10 @@ type Manager struct {
 
 // データベース・エンジンのうち、オペレーティング・システムとやりとりするようなオブジェクト
 type ManagerI interface {
+	DbDirectory() string // create されるときに引数で渡される
+	BlockSize()   int    // 1 block の byte 数
+	OpenFiles()   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
+
 	GetFile(fileName string) *os.File // ファイルを読み込み、プログラム上で使用できるようにする
 	Read(blk Block, page Page) // GetFile で読み込んだ物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
 	Write(blk Block, page Page) // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む。該当のファイルがない場合は作成される
@@ -119,7 +124,7 @@ func (manager *Manager) Append(fileName string) *Block {
 }
 
 // FileManager オブジェクトを作成する
-func CreateManager(directoryPath string, blockSize int) ManagerI {
+func CreateManager(directoryPath string, blockSize int) *Manager {
 	os.Mkdir(directoryPath, 0750)
 	// err := os.Mkdir(directoryPath, 0750)
 	// if err != nil && !os.IsExist(err) {

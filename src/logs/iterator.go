@@ -33,7 +33,7 @@ func (itr *Iterator) Next() []byte {
 func createLogIterator(fileManager *files.Manager, block files.Block) *Iterator {
 	b := make([]byte, fileManager.BlockSize)
 	page := files.LoadBufferToPage(b)
-	itr := Iterator{fileManager: fileManager, block: block, Page: page, Boundary: 0, currentPosition: 0}
+	itr := Iterator{fileManager: fileManager, block: block, Page: *page, Boundary: 0, currentPosition: 0}
 	itr.moveToBlock(&block)
 
 	return &itr

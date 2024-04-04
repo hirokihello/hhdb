@@ -14,6 +14,7 @@ type PageI interface {
 
 // ファイルの内容=ブロックをメモリ上で扱うためのオブジェクト。ファイルを memory に読み込ませたオブジェクト
 type Page struct {
+	PageI;
 	ByteBuffer []byte;
 }
 
@@ -94,6 +95,6 @@ func CreatePage (size int) Page {
 }
 
 // buffer を page の単位で扱えるようにする
-func LoadBufferToPage (initialBytes []byte) PageI {
-	return Page{ByteBuffer: initialBytes}
+func LoadBufferToPage (initialBytes []byte) *Page {
+	return &Page{ByteBuffer: initialBytes}
 }
