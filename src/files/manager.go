@@ -9,10 +9,19 @@ import (
 type Manager struct {
 	DbDirectory string // create されるときに引数で渡される
 	BlockSize   int    // 1 block の byte 数
-	OpenFiles   map[string]*os.File
-	mu          sync.Mutex // guards
+	OpenFiles   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイルの一覧。
+	mu          sync.Mutex // mutex guards
 }
 
+type ManagerI interface {
+	GetFile(fileName string) *os.File // ファイルをメモリに読み込み、プログラム上で使用できるようにする
+	Read(blk Block, page Page) // 物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
+	Write(blk Block, page Page) // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む。該当のファイルがない場合は作成される
+	FileBlockLength(fileName string) int // ファイルに含まれるブロック数を返す
+	Append(fileName string) *Block // 新しいファイルを作成する。そのファイルに該当するブロック情報を return する
+}
+
+// ファイルをメモリに読み込み、プログラム上で使用できるようにする
 func (manager *Manager) GetFile(fileName string) *os.File {
 	// ここで使ってるファイルは基本的にblkやpageの単位のファイルと異なる....!!
 	// blkやpageがどのように作られるのかはまた別の話
@@ -34,8 +43,7 @@ func (manager *Manager) GetFile(fileName string) *os.File {
 	return f
 }
 
-// 物理的なfileの内容を Page に書き込んでメモリ上で保持する
-// ページサイズの分だけ読み込む
+// 物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
 func (manager *Manager) Read(blk Block, page Page) {
 	manager.mu.Lock()
 	file := manager.GetFile(blk.FileName)
@@ -61,7 +69,8 @@ func (manager *Manager) Read(blk Block, page Page) {
 	manager.mu.Unlock()
 }
 
-// writeはpageの内容を物理的なfileに書き込む
+// メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む
+// 該当のファイルがない場合は作成される
 func (manager *Manager) Write(blk Block, page Page) {
 	manager.mu.Lock()
 	// ブロックの情報からファイルを取得
@@ -80,7 +89,7 @@ func (manager *Manager) Write(blk Block, page Page) {
 	manager.mu.Unlock()
 }
 
-// ファイルのブロックの数を返す
+// ファイルに含まれるブロック数を返す
 func (manager *Manager) FileBlockLength(fileName string) int {
 	file := manager.GetFile(fileName)
 	info, _ := file.Stat()
@@ -88,7 +97,8 @@ func (manager *Manager) FileBlockLength(fileName string) int {
 	return int(int(info.Size()) / manager.BlockSize)
 }
 
-// Appendは既存のファイルの最終block後ろにBlockSize分の領域を確保して、そこに割り当てたblockIdとfilenameを持つBlockを返してくれる
+// 新しいファイルを作成する
+// そのファイルに該当するブロック情報を return する
 func (manager *Manager) Append(fileName string) *Block {
 	manager.mu.Lock()
 	file := manager.GetFile(fileName)
@@ -107,7 +117,8 @@ func (manager *Manager) Append(fileName string) *Block {
 	return &block
 }
 
-func CreateManager(directoryPath string, blockSize int) *Manager {
+// FileManager オブジェクトを作成する
+func CreateManager(directoryPath string, blockSize int) ManagerI {
 	os.Mkdir(directoryPath, 0750)
 	// err := os.Mkdir(directoryPath, 0750)
 	// if err != nil && !os.IsExist(err) {

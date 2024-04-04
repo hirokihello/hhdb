@@ -13,10 +13,11 @@ type Block struct {
 	Number int;
 }
 
+// Block のインターフェース
 type BlockI interface {
-	IsEqual() bool;
-	ToString() string;
-	HashCode() string;
+	IsEqual() bool; // block が等しいか検証する
+	ToString() string; // block のファイル名とブロック番号を合わせたものを返す
+	HashCode() string; // ブロックに固有のハッシュ値を返却する
 }
 
 func(a Block) IsEqual (b Block) bool {
