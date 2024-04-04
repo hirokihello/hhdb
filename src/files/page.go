@@ -2,21 +2,23 @@ package files
 import (
 	"encoding/binary"
 )
+
+// ファイルの内容=ブロックをメモリ上で扱うためのオブジェクト。ファイルを memory に読み込ませたオブジェクト
 type PageI interface {
-	SetString();
-	SetInt();
-	GetInt();
-	GetString();
-	Contents();
+	GetString(offset int) string; // page から文字列を読み込む
+	GetInt(offset int) int; // page から数値を読み込む
+	SetString(str string, offset int); // page に文字列を保存する
+	SetInt(offset int, num uint32)(); // page に数値を保存する
+	Contents() []byte; // page の内容を返す
 }
 
-// page を byte の集合として考える
+// ファイルの内容=ブロックをメモリ上で扱うためのオブジェクト。ファイルを memory に読み込ませたオブジェクト
 type Page struct {
 	ByteBuffer []byte;
 }
 
 
-// 1 byte
+// ? なんだこれ
 func (a *Page) GetBytes (offset int) []byte {
 	// 最初の要素に長さが入っているため、長さを取得
 	size := a.GetInt(offset);
@@ -35,7 +37,8 @@ func (a Page) GetInt (offset int) int {
 	return int(binary.LittleEndian.Uint32(a.ByteBuffer[offset:offset+4]));
 }
 
-// int は 4bytes で保存する。
+// page に引数で渡された num を書き込む
+// 引数の uint32 はこの DB の制約によるもの。
 func (a Page) SetInt (offset int, num uint32) {
 	// int max number
 	if(num > 2147483647) {
@@ -53,11 +56,13 @@ func (a Page) SetInt (offset int, num uint32) {
 	a.ByteBuffer[offset+3] = bs[3];
 }
 
+// page に引数で渡された string を書き込む
 func (a Page) SetString (str string, offset int) {
 	bs := []byte(str);
 	a.SetBytes(bs, offset);
 }
 
+// page に引数の内容を書き込む
 func (a *Page) SetBytes(bs []byte, offset int) {
 	a.SetInt(offset, uint32(len(bs)));
 
@@ -68,6 +73,7 @@ func (a *Page) SetBytes(bs []byte, offset int) {
 	}
 }
 
+// なんだこれ ?
 // stringの長さ + 4 bytes (文字列の大きさを表す)
 // public static int maxLength(int strlen) の命名を変更した
 func MaxLengthOfStringOnPage (str string) int {
@@ -75,18 +81,19 @@ func MaxLengthOfStringOnPage (str string) int {
 	return len(str) + 4;
 }
 
+// page オブジェクトの中身を返す
 func (a Page) Contents () []byte {
 	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。
 	return a.ByteBuffer;
 }
 
-// ブロックのサイズを受け取ることがメインで想定されている
+// page オブジェクトを作成する。引数の size は原則ブロックサイズと一致する
 func CreatePage (size int) Page {
 	newBuff := make([]byte, size);
 	return Page{ByteBuffer: newBuff};
 }
 
 // buffer を page の単位で扱えるようにする
-func LoadBufferToPage (initialBytes []byte) Page {
+func LoadBufferToPage (initialBytes []byte) PageI {
 	return Page{ByteBuffer: initialBytes}
 }

@@ -9,13 +9,14 @@ import (
 type Manager struct {
 	DbDirectory string // create されるときに引数で渡される
 	BlockSize   int    // 1 block の byte 数
-	OpenFiles   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイルの一覧。
+	OpenFiles   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
 	mu          sync.Mutex // mutex guards
 }
 
+// データベース・エンジンのうち、オペレーティング・システムとやりとりするようなオブジェクト
 type ManagerI interface {
-	GetFile(fileName string) *os.File // ファイルをメモリに読み込み、プログラム上で使用できるようにする
-	Read(blk Block, page Page) // 物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
+	GetFile(fileName string) *os.File // ファイルを読み込み、プログラム上で使用できるようにする
+	Read(blk Block, page Page) // GetFile で読み込んだ物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
 	Write(blk Block, page Page) // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む。該当のファイルがない場合は作成される
 	FileBlockLength(fileName string) int // ファイルに含まれるブロック数を返す
 	Append(fileName string) *Block // 新しいファイルを作成する。そのファイルに該当するブロック情報を return する

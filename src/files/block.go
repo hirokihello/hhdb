@@ -9,11 +9,11 @@ import (
 // ただfileNameとblockNumber(論理的ブロック数)を持つだけ。
 // どのblockかという識別用の構造体にすぎない
 type Block struct {
-	FileName string;
-	Number int;
+	FileName string; // そのブロックが存在するファイル名
+	Number int; // そのブロックの論理的な識別数値。ファイル内の何番目のブロックなのか。
 }
 
-// Block のインターフェース
+// Block とは物理ファイルをいくつかのチャンクに分割した単位
 type BlockI interface {
 	IsEqual() bool; // block が等しいか検証する
 	ToString() string; // block のファイル名とブロック番号を合わせたものを返す
