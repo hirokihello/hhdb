@@ -41,7 +41,7 @@ func createRecords(start int, end int) {
 	fmt.Println("start creating records")
 
 	for i := start; i <= end; i++ {
-		record := createLogRecord("record"+strconv.Itoa(i), i+100)
+		record := createLogRecord("record"+strconv.Itoa(i), i+10000)
 		lsn := testLogManager.Append(record);
 		fmt.Println(lsn);
 	}

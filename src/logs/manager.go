@@ -37,8 +37,6 @@ func (manager *Manager) Flush(lsn int) {
 
 // iterator
 func (manager *Manager) Iterator() *Iterator {
-	manager.flush()
-
 	return createLogIterator(manager.fileManager, manager.currentBlock)
 }
 
@@ -56,7 +54,7 @@ func (manager *Manager) Append(logRecord []byte) int {
 		// 保存
 		manager.flush()
 		// 新しいブロックの作成
-		manager.appendNewBlock()
+		manager.currentBlock = *manager.appendNewBlock()
 		// boundary を新しくロードしたページの先頭の int に変更
 		boundary = manager.logPage.GetInt(0)
 	}
@@ -75,6 +73,8 @@ func (manager *Manager) Append(logRecord []byte) int {
 // private
 // page の内容をファイルに書き込む
 func (manager *Manager) flush() {
+
+	fmt.Printf("flushed block id: %d\n", manager.currentBlock.Number)
 	// ファイルマネージャーを用いて、現在のログページの内容を、ファイルに書き込み
 	manager.fileManager.Write(manager.currentBlock, manager.logPage)
 	// 最後に保存したログを最新のものに更新
@@ -101,8 +101,8 @@ func CreateManager(fileManager *files.Manager, logFile string) *Manager {
 	logFileBlockSize := fileManager.FileBlockLength(logFile)
 
 	var block files.Block
-	// ブロックが一つもない場合 = 空のファイルの場合、最初のブロックに初期情報を書き込む
-	if logFileBlockSize == 0 {
+	// 初期状態の場合、初期化する。デフォルトでファイルが作られるときにブロックが作られるのでそのように挙動を修正する
+	if logFileBlockSize == 1 {
 		block = files.Block{FileName: logFile, Number: 0}
 		logPage.SetInt(0, uint32(fileManager.BlockSize))
 		fileManager.Write(block, logPage)

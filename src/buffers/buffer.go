@@ -6,10 +6,10 @@ import (
 )
 
 type Buffer struct {
-	fileManager *files.Manager
-	logManager  logs.Manager
+	fileManager *files.Manager // buffer manager が作り出した buffer pool 共通の file manager
+	logManager  logs.Manager // buffer manager が作り出した buffer pool 共通のログ管理オブジェクト。これを使って transaction の結果のログを書き出していく
 	block       *files.Block
-	Contents    files.Page // メモリにロードした中身を保持して返却する
+	contents    files.Page // メモリにロードした中身を保持して返却する
 	pins        int        // 幾つのクライアントから pin されているかを管理
 	txNum       int        // transaction 番号
 	lsn         int        // 変更があった場合、どのログに書き込まれているのかを保持する
@@ -20,7 +20,7 @@ func CreateBuffer(fileManager *files.Manager, logManager logs.Manager) *Buffer {
 		fileManager: fileManager,
 		logManager:  logManager,
 		block:       nil,
-		Contents:    files.CreatePage(fileManager.BlockSize),
+		contents:    files.CreatePage(fileManager.BlockSize),
 		pins:        0,
 		txNum:       -1,
 		lsn:         -1,
@@ -40,19 +40,19 @@ func (buffer *Buffer) IsPinned() bool {
 	return buffer.pins > 0
 }
 
-// 修正が行われた最新の transaction を取得する
+// このバッファーの最新の transaction id を取得する
 func (buffer *Buffer) ModifyingTx() int {
 	return buffer.txNum
 }
 
-// 新しくブロックを buffer に読み込む
+// block を buffer に読み込む
 func (buffer *Buffer) AssignToBlock(block *files.Block) {
 	buffer.flush()
 	//引数のブロックを現在のバッファーに読み込む
 	buffer.block = block
 
 	// 新しく読み込んだブロックの内容をメモリ上のページに読み込む
-	buffer.fileManager.Read(*buffer.block, buffer.Contents)
+	buffer.fileManager.Read(*buffer.block, buffer.Contents())
 
 	// pin の初期化
 	buffer.pins = 0
@@ -62,7 +62,7 @@ func (buffer *Buffer) AssignToBlock(block *files.Block) {
 func (buffer *Buffer) flush() {
 	if buffer.txNum >= 0 {
 		buffer.logManager.Flush(buffer.lsn)
-		buffer.fileManager.Write(*buffer.block, buffer.Contents)
+		buffer.fileManager.Write(*buffer.block, buffer.Contents())
 		buffer.txNum = -1
 	}
 }
@@ -73,4 +73,8 @@ func (buffer *Buffer) Pin() {
 
 func (buffer *Buffer) Unpin() {
 	buffer.pins--
+}
+
+func (buffer *Buffer) Contents() files.Page {
+	return buffer.contents
 }

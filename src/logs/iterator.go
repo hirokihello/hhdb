@@ -1,8 +1,6 @@
 package logs
 
 import (
-	"fmt"
-
 	"github.com/hirokihello/hhdb/src/files"
 )
 
@@ -22,12 +20,17 @@ func (itr *Iterator) Next() []byte {
 	for itr.currentPosition == itr.fileManager.BlockSize {
 		itr.block = files.Block{Number: itr.block.Number - 1, FileName: itr.block.FileName}
 		itr.moveToBlock(&itr.block)
-		fmt.Println(itr.block.Number)
 	}
 
 	records := itr.Page.GetBytes(itr.currentPosition)
 	itr.currentPosition += 4 + len(records)
 	return records
+}
+
+func (itr *Iterator) moveToBlock(block *files.Block) {
+	itr.fileManager.Read(*block, itr.Page)
+	itr.Boundary = itr.Page.GetInt(0)
+	itr.currentPosition = itr.Boundary
 }
 
 func createLogIterator(fileManager *files.Manager, block files.Block) *Iterator {
@@ -37,10 +40,4 @@ func createLogIterator(fileManager *files.Manager, block files.Block) *Iterator 
 	itr.moveToBlock(&block)
 
 	return &itr
-}
-
-func (itr *Iterator) moveToBlock(block *files.Block) {
-	itr.fileManager.Read(*block, itr.Page)
-	itr.Boundary = itr.Page.GetInt(0)
-	itr.currentPosition = itr.Boundary
 }

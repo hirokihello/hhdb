@@ -50,7 +50,7 @@ func TestBuffer(t *testing.T) {
 	bufferManager := db.BufferManager
 
 	buffer1, _ := bufferManager.Pin(&files.Block{FileName: "buffer_test", Number: 0})
-	page := buffer1.Contents
+	page := buffer1.Contents()
 	n := page.GetInt(80)
 
 	if n == 10000000 {
@@ -74,7 +74,7 @@ func TestBuffer(t *testing.T) {
 	bufferManager.Unpin(buffer2)
 
 	buffer2, _ = bufferManager.Pin(&files.Block{FileName: "buffer_test", Number: 0})
-	page2 := buffer2.Contents
+	page2 := buffer2.Contents()
 	page2.SetInt(80, uint32(10000000))
 	buffer2.SetModified(1, 0)
 	bufferManager.Unpin(buffer2)

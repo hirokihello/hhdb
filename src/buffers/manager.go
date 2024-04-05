@@ -13,23 +13,10 @@ import (
 var MAX_WAIT_TIME int = 5
 
 type Manager struct {
-	bufferPool         []*Buffer
+	bufferPool         []*Buffer // buffer = memory 上に保持している
 	numAvailableBuffer int
 	mu                 sync.Mutex     // 排他処理を行うためのもの
 	wg                 sync.WaitGroup // pin の処理を制御するため
-}
-
-func CreateManager(fileManager *files.Manager, logManager logs.Manager, bufferCount int) *Manager {
-	bufferPool := make([]*Buffer, bufferCount)
-
-	for i := 0; i < bufferCount; i++ {
-		bufferPool[i] = CreateBuffer(fileManager, logManager)
-	}
-
-	return &Manager{
-		bufferPool:         bufferPool,
-		numAvailableBuffer: bufferCount,
-	}
 }
 
 func (manager *Manager) Available() int {
@@ -81,10 +68,10 @@ func (manager *Manager) Pin(block *files.Block) (*Buffer, error) {
 
 // buffer pool で管理しているバッファーに読み込む
 func (manager *Manager) tryToPin(block *files.Block) *Buffer {
-	// すでに読み込まれているかチェック
+	// すでに buffer にブロックが読み込まれているかチェック
 	buffer := manager.findExistingBuffer(block)
 
-	// 読み込まれていない場合
+	// 読み込まれていない場合、どこかのバッファーに読み込む
 	if buffer == nil {
 		// 空いているバッファーがあれば、そこにブロックを読みこむ
 		buffer = manager.chooseUnpinnedBuffer()
@@ -136,4 +123,17 @@ func (manager *Manager) chooseUnpinnedBuffer() *Buffer {
 // 最初にトライしてから 10 秒以上経過した場合、待ちすぎなので true が返却される
 func waitingTooLong(startAt int64) bool {
 	return time.Now().Unix()-startAt > int64(MAX_WAIT_TIME)
+}
+
+func CreateManager(fileManager *files.Manager, logManager logs.Manager, bufferCount int) *Manager {
+	bufferPool := make([]*Buffer, bufferCount)
+
+	for i := 0; i < bufferCount; i++ {
+		bufferPool[i] = CreateBuffer(fileManager, logManager)
+	}
+
+	return &Manager{
+		bufferPool:         bufferPool,
+		numAvailableBuffer: bufferCount,
+	}
 }
