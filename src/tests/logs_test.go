@@ -15,6 +15,7 @@ var testLogManager *logs.Manager
 func TestLogManager(t *testing.T) {
 	database := db.CreateDB("test_dir", 400, 3)
 	testLogManager = database.LogManager;
+	fmt.Println("starting test log manager")
 	createRecords(1, 35);
 	printLogRecords("printing...");
 	createRecords(36, 70);

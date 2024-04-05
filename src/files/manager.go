@@ -8,23 +8,25 @@ import (
 
 type Manager struct {
 	ManagerI
-	DbDirectory string // create されるときに引数で渡される
-	BlockSize   int    // 1 block の byte 数
+	isNew       bool
+	DbDirectory string              // create されるときに引数で渡される
+	BlockSize   int                 // 1 block の byte 数
 	OpenFiles   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
-	mu          sync.Mutex // mutex guards
+	mu          sync.Mutex          // mutex guards
 }
 
 // データベース・エンジンのうち、オペレーティング・システムとやりとりするようなオブジェクト
 type ManagerI interface {
-	DbDirectory() string // create されるときに引数で渡される
-	BlockSize()   int    // 1 block の byte 数
-	OpenFiles()   map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
+	DbDirectory() string            // create されるときに引数で渡される
+	BlockSize() int                 // 1 block の byte 数
+	OpenFiles() map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
 
-	GetFile(fileName string) *os.File // ファイルを読み込み、プログラム上で使用できるようにする
-	Read(blk Block, page Page) // GetFile で読み込んだ物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
-	Write(blk Block, page Page) // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む。該当のファイルがない場合は作成される
+	GetFile(fileName string) *os.File    // ファイルを読み込み、プログラム上で使用できるようにする
+	Read(blk Block, page Page)           // GetFile で読み込んだ物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
+	Write(blk Block, page Page)          // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む。該当のファイルがない場合は作成される
 	FileBlockLength(fileName string) int // ファイルに含まれるブロック数を返す
-	Append(fileName string) *Block // 新しいファイルを作成する。そのファイルに該当するブロック情報を return する
+	Append(fileName string) *Block       // ファイルを拡張する。そのファイルに該当するブロック情報を return する
+	IsNew(fileName string) bool          // 新しいファイルかどうかを確認する。何に使われるのかは不明
 }
 
 // ファイルをメモリに読み込み、プログラム上で使用できるようにする
@@ -49,7 +51,7 @@ func (manager *Manager) GetFile(fileName string) *os.File {
 	return f
 }
 
-// 物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
+// ブロックをメモリ上の Page オブジェクトに読み込ませる。該当するブロックが存在しない場合、空のブロックを作成する
 func (manager *Manager) Read(blk Block, page Page) {
 	manager.mu.Lock()
 	file := manager.GetFile(blk.FileName)
@@ -83,11 +85,11 @@ func (manager *Manager) Write(blk Block, page Page) {
 	file := manager.GetFile(blk.FileName)
 	info, _ := file.Stat()
 	//ファイルが小さかったら拡張
-	if info.Size() < int64((blk.Number + 1) * manager.BlockSize) {
+	if info.Size() < int64((blk.Number+1)*manager.BlockSize) {
 		file.Truncate(int64((blk.Number + 1) * manager.BlockSize))
 	}
 	// 第二引数0はファイルの先頭からのoffsetを示す
-	file.Seek(int64(blk.Number * manager.BlockSize), 0)
+	file.Seek(int64(blk.Number*manager.BlockSize), 0)
 
 	// ページにロードされている内容を読み込む
 	file.Write(page.Contents())
@@ -103,7 +105,7 @@ func (manager *Manager) FileBlockLength(fileName string) int {
 	return int(int(info.Size()) / manager.BlockSize)
 }
 
-// 新しいファイルを作成する
+// ファイルを拡張する
 // そのファイルに該当するブロック情報を return する
 func (manager *Manager) Append(fileName string) *Block {
 	manager.mu.Lock()
@@ -121,6 +123,10 @@ func (manager *Manager) Append(fileName string) *Block {
 	file.Sync()
 	manager.mu.Unlock()
 	return &block
+}
+
+func (manager *Manager) IsNew() bool {
+	return manager.isNew
 }
 
 // FileManager オブジェクトを作成する
