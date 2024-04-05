@@ -42,9 +42,9 @@ func (manager *Manager) Iterator() *Iterator {
 	return createLogIterator(manager.fileManager, manager.currentBlock)
 }
 
-// page の内容を log ファイルに書き込む
+// log を logPage に保存する。
 // 最新のログレコードの数値を返却する
-// 右から左に向かってページの中を書き換えていく
+// 右から左に向かってページの中を書き換えていくのに注意。右詰でログレコードを足していく
 func (manager *Manager) Append(logRecord []byte) int {
 	boundary := manager.logPage.GetInt(0)
 	recordSize := len(logRecord)
@@ -56,7 +56,7 @@ func (manager *Manager) Append(logRecord []byte) int {
 		// 保存
 		manager.flush()
 		// 新しいブロックの作成
-		manager.appendNewBlock();
+		manager.appendNewBlock()
 		// boundary を新しくロードしたページの先頭の int に変更
 		boundary = manager.logPage.GetInt(0)
 	}
@@ -64,7 +64,7 @@ func (manager *Manager) Append(logRecord []byte) int {
 	recordPosition := boundary - bytesNeededForNewRecord
 	// page にレコードの内容を書き込み
 	manager.logPage.SetBytes(logRecord, recordPosition)
-	// logPage の容量を更新
+	// logPage の残りサイズを更新
 	manager.logPage.SetInt(0, uint32(recordPosition))
 
 	manager.latestLSN += 1
@@ -84,6 +84,8 @@ func (manager *Manager) flush() {
 // 新しく block を作成する
 func (manager *Manager) appendNewBlock() *files.Block {
 	block := manager.fileManager.Append(manager.logFile)
+
+	// 一番最初の 4 byte にブロックサイズを格納
 	manager.logPage.SetInt(0, uint32(manager.fileManager.BlockSize))
 	manager.fileManager.Write(*block, manager.logPage)
 
