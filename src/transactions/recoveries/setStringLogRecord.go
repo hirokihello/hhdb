@@ -5,6 +5,7 @@ import (
 
 	"github.com/hirokihello/hhdb/src/db"
 	"github.com/hirokihello/hhdb/src/files"
+	"github.com/hirokihello/hhdb/src/logs"
 )
 
 type StringLogRecord struct {
@@ -74,23 +75,23 @@ func (stringLogRecord *StringLogRecord) UnDo(transaction Tx) {
 	Tx.unpin()
 }
 
-func (stringLogRecord *StringLogRecord) WriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val int) int {
+func (stringLogRecord *StringLogRecord) WriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val string) int {
 	tpos := db.INTEGER_BYTES
 	fpos := tpos + db.INTEGER_BYTES
 	bpos := fpos + files.MaxLengthOfStringOnPage(blk.FileName)
 	opos := bpos + db.INTEGER_BYTES
 	vpos := opos + db.INTEGER_BYTES
-	reclen := vpos += files.MaxLengthOfStringOnPage(val)
+	reclen := vpos + files.MaxLengthOfStringOnPage(val)
 
 	rec := make([]byte, reclen)
-	p := files.CreatePageByByte(rec)
+	p := files.CreatePageByBytes(rec)
 
-	p.setInt(0, SETSTRING);
-	p.setInt(tpos, txnum);
-	p.setString(fpos, blk.fileName());
-	p.setInt(bpos, blk.number());
-	p.setInt(opos, offset);
-	p.setString(vpos, val);
+	p.SetInt(0, SETSTRING)
+	p.SetInt(tpos, uint32(txnum))
+	p.SetString(blk.FileName, fpos)
+	p.SetInt(bpos, uint32(blk.Number))
+	p.SetInt(opos, uint32(offset))
+	p.SetString(val, vpos)
 
-	return lm.Append(p)
+	return lm.Append(p.Contents())
 }
