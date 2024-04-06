@@ -10,17 +10,17 @@ type CheckpointLogRecord struct {
 	LogRecord
 }
 
-func (checkpointLogRecord *CheckpointLogRecord) Op() int {
+func (checkpointLogRecord CheckpointLogRecord) Op() int {
 	return CHECKPOINT
 }
 
-func (checkpointLogRecord *CheckpointLogRecord) TxNumber() int {
+func (checkpointLogRecord CheckpointLogRecord) TxNumber() int {
 	return -1
 }
 
-func (checkpointLogRecord *CheckpointLogRecord) Undo() {}
+func (checkpointLogRecord CheckpointLogRecord) Undo() {}
 
-func (checkpointLogRecord *CheckpointLogRecord) ToString() string {
+func (checkpointLogRecord CheckpointLogRecord) ToString() string {
 	return "<CHECKPOINT>"
 }
 

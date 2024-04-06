@@ -1,8 +1,6 @@
 package recoveries
 
 import (
-	"fmt"
-
 	"github.com/hirokihello/hhdb/src/files"
 )
 
@@ -23,7 +21,7 @@ const SETSTRING = 5
 type LogRecord interface {
 	Op() int
 	TxNumber() int
-	undo()
+	Undo()
 }
 
 func CreateLogRecord(bytes []byte) LogRecord {

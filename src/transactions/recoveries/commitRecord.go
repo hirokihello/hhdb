@@ -11,25 +11,25 @@ type CommitLogRecord struct {
 	txnum int
 }
 
-func (commitLogRecord *CommitLogRecord) Op() int {
+func (commitLogRecord CommitLogRecord) Op() int {
 	return COMMIT
 }
 
-func (commitLogRecord *CommitLogRecord) TxNumber() int {
+func (commitLogRecord CommitLogRecord) TxNumber() int {
 	return -1
 }
 
-func (commitLogRecord *CommitLogRecord) Undo() {}
+func (commitLogRecord CommitLogRecord) Undo() {}
 
-func (commitLogRecord *CommitLogRecord) ToString() string {
+func (commitLogRecord CommitLogRecord) ToString() string {
 	return "<COMMIT " + string(commitLogRecord.txnum) + ">"
 }
 
-func CommitRecordWriteToLog(lm logs.Manager) int {
+func CommitRecordWriteToLog(lm logs.Manager, txnum int) int {
 	rec := make([]byte, db.INTEGER_BYTES*2)
 	p := files.CreatePageByBytes(rec)
 	p.SetInt(0, COMMIT)
-	p.SetInt(db.INTEGER_BYTES, uint32(commitLogRecord.txnum))
+	p.SetInt(db.INTEGER_BYTES, uint32(txnum))
 	return lm.Append(rec)
 }
 

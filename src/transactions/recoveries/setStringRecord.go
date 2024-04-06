@@ -49,15 +49,15 @@ func CreateSetStringRecord(p files.Page) StringLogRecord {
 	}
 }
 
-func (stringLogRecord *StringLogRecord) Op() int {
+func (stringLogRecord StringLogRecord) Op() int {
 	return SETSTRING
 }
 
-func (stringLogRecord *StringLogRecord) Txnumber() int {
+func (stringLogRecord StringLogRecord) Txnumber() int {
 	return stringLogRecord.txnum
 }
 
-func (stringLogRecord *StringLogRecord) ToString() string {
+func (stringLogRecord StringLogRecord) ToString() string {
 	return "<SETSTRING " +
 		strconv.Itoa(stringLogRecord.txnum) +
 		" " +
@@ -69,7 +69,7 @@ func (stringLogRecord *StringLogRecord) ToString() string {
 		">"
 }
 
-func (stringLogRecord *StringLogRecord) UnDo(transaction Tx) {
+func (stringLogRecord StringLogRecord) UnDo(transaction Tx) {
 	Tx.pin()
 	Tx.SetString(stringLogRecord.blk, stringLogRecord.offset, stringLogRecord.val, false)
 	Tx.unpin()

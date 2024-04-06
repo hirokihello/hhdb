@@ -49,15 +49,15 @@ func CreateSetIntRecord(p files.Page) SetIntLogRecord {
 	}
 }
 
-func (setIntLogRecord *SetIntLogRecord) Op() int {
+func (setIntLogRecord SetIntLogRecord) Op() int {
 	return SETINT
 }
 
-func (setIntLogRecord *SetIntLogRecord) Txnumber() int {
+func (setIntLogRecord SetIntLogRecord) Txnumber() int {
 	return setIntLogRecord.txnum
 }
 
-func (setIntLogRecord *SetIntLogRecord) ToString() string {
+func (setIntLogRecord SetIntLogRecord) ToString() string {
 	return "<SETINT " +
 		strconv.Itoa(setIntLogRecord.txnum) +
 		" " +
@@ -69,7 +69,7 @@ func (setIntLogRecord *SetIntLogRecord) ToString() string {
 		">"
 }
 
-func (setIntLogRecord *SetIntLogRecord) UnDo(transaction Tx) {
+func (setIntLogRecord SetIntLogRecord) UnDo(transaction Tx) {
 	Tx.pin()
 	Tx.SetString(setIntLogRecord.blk, setIntLogRecord.offset, setIntLogRecord.val, false)
 	Tx.unpin()
