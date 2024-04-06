@@ -33,8 +33,8 @@ func CheckRollbackWriteToLog(lm logs.Manager, txnum int) int {
 	return lm.Append(rec)
 }
 
-func CreateRollbackRecord(txnum int) RollbackRecord {
+func CreateRollbackRecord(page files.Page) RollbackRecord {
 	return RollbackRecord{
-		txnum, txnum,
+		txnum: page.GetInt(db.INTEGER_BYTES),
 	}
 }
