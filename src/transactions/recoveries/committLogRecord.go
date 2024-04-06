@@ -8,10 +8,11 @@ import (
 
 type CommitLogRecord struct {
 	LogRecord
+	txnum int
 }
 
 func (commitLogRecord *CommitLogRecord) Op() int {
-	return CHECKPOINT
+	return COMMIT
 }
 
 func (commitLogRecord *CommitLogRecord) TxNumber() int {
@@ -21,16 +22,20 @@ func (commitLogRecord *CommitLogRecord) TxNumber() int {
 func (commitLogRecord *CommitLogRecord) Undo() {}
 
 func (commitLogRecord *CommitLogRecord) ToString() string {
-	return "<CHECKPOINT>"
+	return "<COMMIT " + string(commitLogRecord.txnum) + ">"
 }
 
 func (commitLogRecord *CommitLogRecord) WriteToLog(lm logs.Manager) int {
-	rec := make([]byte, db.INTEGER_BYTES)
+	rec := make([]byte, db.INTEGER_BYTES*2)
 	p := files.CreatePageByBytes(rec)
-	p.SetInt(0, CHECKPOINT)
+	p.SetInt(0, COMMIT)
+	p.SetInt(db.INTEGER_BYTES, uint32(commitLogRecord.txnum))
 	return lm.Append(rec)
 }
 
-func CreateCommitLogRecord() CommitLogRecord {
-	return CommitLogRecord{}
+func CreateCommitLogRecord(page files.Page) CommitLogRecord {
+	tpos := db.INTEGER_BYTES
+	return CommitLogRecord{
+		txnum: page.GetInt(tpos),
+	}
 }
