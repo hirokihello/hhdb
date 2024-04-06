@@ -1,4 +1,4 @@
-package transaction
+package recoveries
 
 import (
 	"github.com/hirokihello/hhdb/src/db"
@@ -25,7 +25,7 @@ func (commitLogRecord *CommitLogRecord) ToString() string {
 	return "<COMMIT " + string(commitLogRecord.txnum) + ">"
 }
 
-func (commitLogRecord *CommitLogRecord) WriteToLog(lm logs.Manager) int {
+func CommitRecordWriteToLog(lm logs.Manager) int {
 	rec := make([]byte, db.INTEGER_BYTES*2)
 	p := files.CreatePageByBytes(rec)
 	p.SetInt(0, COMMIT)
@@ -33,7 +33,7 @@ func (commitLogRecord *CommitLogRecord) WriteToLog(lm logs.Manager) int {
 	return lm.Append(rec)
 }
 
-func CreateCommitLogRecord(page files.Page) CommitLogRecord {
+func CreateCommitRecord(page files.Page) CommitLogRecord {
 	tpos := db.INTEGER_BYTES
 	return CommitLogRecord{
 		txnum: page.GetInt(tpos),

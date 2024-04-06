@@ -1,4 +1,4 @@
-package transaction
+package recoveries
 
 import (
 	"strconv"
@@ -8,15 +8,15 @@ import (
 	"github.com/hirokihello/hhdb/src/logs"
 )
 
-type StringLogRecord struct {
+type SetIntLogRecord struct {
 	LogRecord
 	txnum  int
 	offset int
 	blk    files.Block
-	val    string
+	val    int
 }
 
-func CreateSetStringRecord(p files.Page) StringLogRecord {
+func CreateSetIntRecord(p files.Page) SetIntLogRecord {
 	// recovery manager の page の使い方に則る。
 
 	// 4 byte 目に格納されている transaction number を取得する
@@ -39,9 +39,9 @@ func CreateSetStringRecord(p files.Page) StringLogRecord {
 
 	// 最後にログの内容の string
 	vpos := ops + db.INTEGER_BYTES
-	val := p.GetString(vpos)
+	val := p.GetInt(vpos)
 
-	return StringLogRecord{
+	return SetIntLogRecord{
 		txnum:  txnum,
 		offset: offset,
 		blk:    blk,
@@ -49,49 +49,49 @@ func CreateSetStringRecord(p files.Page) StringLogRecord {
 	}
 }
 
-func (stringLogRecord *StringLogRecord) Op() int {
-	return SETSTRING
+func (setIntLogRecord *SetIntLogRecord) Op() int {
+	return SETINT
 }
 
-func (stringLogRecord *StringLogRecord) Txnumber() int {
-	return stringLogRecord.txnum
+func (setIntLogRecord *SetIntLogRecord) Txnumber() int {
+	return setIntLogRecord.txnum
 }
 
-func (stringLogRecord *StringLogRecord) ToString() string {
-	return "<SETSTRING " +
-		strconv.Itoa(stringLogRecord.txnum) +
+func (setIntLogRecord *SetIntLogRecord) ToString() string {
+	return "<SETINT " +
+		strconv.Itoa(setIntLogRecord.txnum) +
 		" " +
-		stringLogRecord.blk.ToString() +
+		setIntLogRecord.blk.ToString() +
 		" " +
-		strconv.Itoa(stringLogRecord.offset) +
+		strconv.Itoa(setIntLogRecord.offset) +
 		" " +
-		stringLogRecord.val +
+		strconv.Itoa(setIntLogRecord.val) +
 		">"
 }
 
-func (stringLogRecord *StringLogRecord) UnDo(transaction Tx) {
+func (setIntLogRecord *SetIntLogRecord) UnDo(transaction Tx) {
 	Tx.pin()
-	Tx.SetString(stringLogRecord.blk, stringLogRecord.offset, stringLogRecord.val, false)
+	Tx.SetString(setIntLogRecord.blk, setIntLogRecord.offset, setIntLogRecord.val, false)
 	Tx.unpin()
 }
 
-func (stringLogRecord *StringLogRecord) WriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val string) int {
+func SetIntRecordWriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val int) int {
 	tpos := db.INTEGER_BYTES
 	fpos := tpos + db.INTEGER_BYTES
 	bpos := fpos + files.MaxLengthOfStringOnPage(blk.FileName)
 	opos := bpos + db.INTEGER_BYTES
 	vpos := opos + db.INTEGER_BYTES
-	reclen := vpos + files.MaxLengthOfStringOnPage(val)
+	reclen := vpos + db.INTEGER_BYTES
 
 	rec := make([]byte, reclen)
 	p := files.CreatePageByBytes(rec)
 
-	p.SetInt(0, SETSTRING)
+	p.SetInt(0, SETINT)
 	p.SetInt(tpos, uint32(txnum))
 	p.SetString(fpos, blk.FileName)
 	p.SetInt(bpos, uint32(blk.Number))
 	p.SetInt(opos, uint32(offset))
-	p.SetString(vpos, val)
+	p.SetInt(vpos, uint32(val))
 
 	return lm.Append(p.Contents())
 }

@@ -1,4 +1,4 @@
-package transaction
+package recoveries
 
 import (
 	"github.com/hirokihello/hhdb/src/db"
@@ -24,13 +24,13 @@ func (checkpointLogRecord *CheckpointLogRecord) ToString() string {
 	return "<CHECKPOINT>"
 }
 
-func (checkpointLogRecord *CheckpointLogRecord) WriteToLog(lm logs.Manager) int {
+func CheckpointRecordWriteToLog(lm logs.Manager) int {
 	rec := make([]byte, db.INTEGER_BYTES)
 	p := files.CreatePageByBytes(rec)
 	p.SetInt(0, CHECKPOINT)
 	return lm.Append(rec)
 }
 
-func CreateCheckpointLogRecord() CheckpointLogRecord {
+func CreateCheckpointRecord() CheckpointLogRecord {
 	return CheckpointLogRecord{}
 }
