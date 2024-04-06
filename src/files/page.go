@@ -8,7 +8,7 @@ import (
 type PageI interface {
 	GetString(offset int) string      // page から文字列を読み込む
 	GetInt(offset int) int            // page から数値を読み込む
-	SetString(str string, offset int) // page に文字列を保存する
+	SetString(offset int, str string) // page に文字列を保存する
 	SetInt(offset int, num uint32)    // page に数値を保存する
 	Contents() []byte                 // page の内容を返す
 }
@@ -62,7 +62,7 @@ func (a Page) SetInt(offset int, num uint32) {
 }
 
 // page に引数で渡された string を書き込む
-func (a Page) SetString(str string, offset int) {
+func (a Page) SetString(offset int, str string) {
 	bs := []byte(str)
 	a.SetBytes(bs, offset)
 }

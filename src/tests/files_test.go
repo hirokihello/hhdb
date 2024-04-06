@@ -58,7 +58,7 @@ func TestPageSetString(t *testing.T) {
 	bs := []byte("fasjfauifnauifnwefbwebfiwbvvfavvdavav")
 	page := files.LoadBufferToPage(bs)
 
-	page.SetString("1234ABCD", 4)
+	page.SetString(4, "1234ABCD")
 
 	if page.GetString(4) != "1234ABCD" {
 		t.Errorf("blk.ToString() = [%v], want: [%v]", page.GetString(4), "1234ABCD")
@@ -70,7 +70,7 @@ func TestManager(t *testing.T) {
 	block := files.Block{FileName: "test_block_2", Number: 2}
 	page_1 := files.CreatePage(400)
 	position_1 := 88
-	page_1.SetString("abcdefggg", position_1)
+	page_1.SetString(position_1, "abcdefggg")
 	size := files.MaxLengthOfStringOnPage("abcdefggg")
 	position_2 := size + position_1
 	page_1.SetInt(position_2, 345)

@@ -88,10 +88,10 @@ func (setIntLogRecord *SetIntLogRecord) WriteToLog(lm logs.Manager, txnum int, b
 
 	p.SetInt(0, SETINT)
 	p.SetInt(tpos, uint32(txnum))
-	p.SetString(blk.FileName, fpos)
+	p.SetString(fpos, blk.FileName)
 	p.SetInt(bpos, uint32(blk.Number))
 	p.SetInt(opos, uint32(offset))
-	p.SetInt(val, vpos)
+	p.SetInt(vpos, uint32(val))
 
 	return lm.Append(p.Contents())
 }

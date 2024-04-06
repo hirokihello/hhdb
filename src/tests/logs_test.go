@@ -51,7 +51,7 @@ func createLogRecord (str string, num int) []byte {
 	nextPosition := files.MaxLengthOfStringOnPage(str);
 	byteArr := make([]byte, nextPosition + 4);
 	newPage := files.LoadBufferToPage(byteArr);
-	newPage.SetString(str, 0);
+	newPage.SetString(0, str);
 	newPage.SetInt(nextPosition, uint32(num));
 	return byteArr;
 }
