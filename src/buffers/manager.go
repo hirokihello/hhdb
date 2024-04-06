@@ -25,7 +25,7 @@ func (manager *Manager) Available() int {
 	return manager.numAvailableBuffer
 }
 
-// 引数の transaction id と一致する修正番号をもつ buffer の内容をディスクに書き込む
+// 引数の transaction id と一致する transaction 番号をもつ buffer の内容をディスクに書き込む
 func (manager *Manager) FlushAll(txnum int) {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()

@@ -20,7 +20,7 @@ func CreateSetIntRecord(p files.Page) SetIntLogRecord {
 	// recovery manager の page の使い方に則る。
 
 	// 4 byte 目に格納されている transaction number を取得する
-	// 最初の 4 byte にはそのレコードの長さが格納されているため、その次に transaction id が必要になる
+	// 最初の 4 byte にはそのレコードの種類が格納されているため、その次に transaction id が必要になる
 	tpos := db.INTEGER_BYTES
 	txnum := p.GetInt(tpos)
 
@@ -71,6 +71,7 @@ func (setIntLogRecord SetIntLogRecord) ToString() string {
 
 func (setIntLogRecord SetIntLogRecord) UnDo(transaction Tx) {
 	Tx.pin()
+	// 記録されているのが古い value なので、それを transaction のブロックにセットし直す
 	Tx.SetString(setIntLogRecord.blk, setIntLogRecord.offset, setIntLogRecord.val, false)
 	Tx.unpin()
 }

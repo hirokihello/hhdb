@@ -71,6 +71,7 @@ func (stringLogRecord StringLogRecord) ToString() string {
 
 func (stringLogRecord StringLogRecord) UnDo(transaction Tx) {
 	Tx.pin()
+	// 記録されているのが古い value なので、それを transaction のブロックにセットし直す
 	Tx.SetString(stringLogRecord.blk, stringLogRecord.offset, stringLogRecord.val, false)
 	Tx.unpin()
 }

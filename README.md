@@ -58,4 +58,5 @@ insert students id = "xxx_additional";
 
 ```
 
-動作主からすれば、
+# chap5
+recovery manager は transaction ごとに生成される

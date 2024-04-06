@@ -31,6 +31,7 @@ func CheckpointRecordWriteToLog(lm logs.Manager) int {
 	return lm.Append(rec)
 }
 
+// 二つ目の 4 byte 目に txnum が保存されているような page が引数として渡される
 func CreateCheckpointRecord() CheckpointLogRecord {
 	return CheckpointLogRecord{}
 }

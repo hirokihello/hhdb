@@ -9,7 +9,7 @@ type Buffer struct {
 	fileManager *files.Manager // buffer manager が作り出した buffer pool 共通の file manager
 	logManager  logs.Manager // buffer manager が作り出した buffer pool 共通のログ管理オブジェクト。これを使って transaction の結果のログを書き出していく
 	block       *files.Block
-	contents    files.Page // メモリにロードした中身を保持して返却する
+	contents    *files.Page // メモリにロードした中身を保持して返却する
 	pins        int        // 幾つのクライアントから pin されているかを管理
 	txNum       int        // transaction 番号
 	lsn         int        // 変更があった場合、どのログに書き込まれているのかを保持する
@@ -77,4 +77,9 @@ func (buffer *Buffer) Unpin() {
 
 func (buffer *Buffer) Contents() files.Page {
 	return buffer.contents
+}
+
+
+func (buffer *Buffer) Block() files.Block {
+	return buffer.block
 }
