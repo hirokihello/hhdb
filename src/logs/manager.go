@@ -43,6 +43,7 @@ func (manager *Manager) Iterator() *Iterator {
 // log を logPage に保存する。
 // 最新のログレコードの数値を返却する
 // 右から左に向かってページの中を書き換えていくのに注意。右詰でログレコードを足していく
+// byte 列のログレコードを引数として受け取り、ログとして保存する
 func (manager *Manager) Append(logRecord []byte) int {
 	boundary := manager.logPage.GetInt(0)
 	recordSize := len(logRecord)

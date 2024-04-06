@@ -6,6 +6,8 @@ import (
 	"github.com/hirokihello/hhdb/src/logs"
 )
 
+const INTEGER_BYTES = 4;
+
 type Db struct {
 	FileManager   *files.Manager
 	LogManager    *logs.Manager

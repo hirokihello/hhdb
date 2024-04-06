@@ -98,6 +98,11 @@ func CreatePage(size int) Page {
 	return Page{ByteBuffer: newBuff}
 }
 
+// page オブジェクトを作成する。つまりメモリに領域を確保する。引数の size は原則ブロックサイズと一致する
+func CreatePageByBytes(bytes []byte) Page {
+	return Page{ByteBuffer: bytes}
+}
+
 // buffer を page の単位で扱えるようにする
 func LoadBufferToPage(initialBytes []byte) *Page {
 	return &Page{ByteBuffer: initialBytes}
