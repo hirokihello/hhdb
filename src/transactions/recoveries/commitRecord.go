@@ -11,18 +11,18 @@ type CommitLogRecord struct {
 	txnum int
 }
 
-func (commitLogRecord CommitLogRecord) Op() int {
+func (commitRecord CommitLogRecord) Op() int {
 	return COMMIT
 }
 
-func (commitLogRecord CommitLogRecord) TxNumber() int {
-	return -1
+func (commitRecord CommitLogRecord) TxNumber() int {
+	return commitRecord.txnum
 }
 
-func (commitLogRecord CommitLogRecord) Undo() {}
+func (commitRecord CommitLogRecord) Undo() {}
 
-func (commitLogRecord CommitLogRecord) ToString() string {
-	return "<COMMIT " + string(commitLogRecord.txnum) + ">"
+func (commitRecord CommitLogRecord) ToString() string {
+	return "<COMMIT " + string(commitRecord.txnum) + ">"
 }
 
 func CommitRecordWriteToLog(lm logs.Manager, txnum int) int {

@@ -6,23 +6,23 @@ import (
 	"github.com/hirokihello/hhdb/src/logs"
 )
 
-type StartLogRecord struct {
+type StartRecord struct {
 	LogRecord
 	txnum int
 }
 
-func (commitLogRecord StartLogRecord) Op() int {
+func (startRecord StartRecord) Op() int {
 	return COMMIT
 }
 
-func (commitLogRecord StartLogRecord) TxNumber() int {
-	return -1
+func (startRecord StartRecord) TxNumber() int {
+	return startRecord.txnum
 }
 
-func (commitLogRecord StartLogRecord) Undo() {}
+func (startRecord StartRecord) Undo() {}
 
-func (commitLogRecord StartLogRecord) ToString() string {
-	return "<COMMIT " + string(commitLogRecord.txnum) + ">"
+func (startRecord StartRecord) ToString() string {
+	return "<COMMIT " + string(startRecord.txnum) + ">"
 }
 
 func StartRecordWriteToLog(lm logs.Manager, txnum int) int {
@@ -33,9 +33,9 @@ func StartRecordWriteToLog(lm logs.Manager, txnum int) int {
 	return lm.Append(rec)
 }
 
-func CreateStartRecord(page files.Page) StartLogRecord {
+func CreateStartRecord(page files.Page) StartRecord {
 	tpos := db.INTEGER_BYTES
-	return StartLogRecord{
+	return StartRecord{
 		txnum: page.GetInt(tpos),
 	}
 }

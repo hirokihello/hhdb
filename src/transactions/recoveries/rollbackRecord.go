@@ -1,0 +1,40 @@
+package recoveries
+
+import (
+	"github.com/hirokihello/hhdb/src/db"
+	"github.com/hirokihello/hhdb/src/files"
+	"github.com/hirokihello/hhdb/src/logs"
+)
+
+type RollbackRecord struct {
+	LogRecord
+	txnum int
+}
+
+func (rollbackRecord RollbackRecord) Op() int {
+	return ROLLBACK
+}
+
+func (rollbackRecord RollbackRecord) TxNumber() int {
+	return rollbackRecord.txnum
+}
+
+func (rollbackRecord RollbackRecord) Undo() {}
+
+func (rollbackRecord RollbackRecord) ToString() string {
+	return "<CHECKPOINT>"
+}
+
+func CheckRollbackWriteToLog(lm logs.Manager, txnum int) int {
+	rec := make([]byte, db.INTEGER_BYTES*2)
+	p := files.CreatePageByBytes(rec)
+	p.SetInt(0, ROLLBACK)
+	p.SetInt(db.INTEGER_BYTES, uint32(txnum))
+	return lm.Append(rec)
+}
+
+func CreateRollbackRecord(txnum int) RollbackRecord {
+	return RollbackRecord{
+		txnum, txnum,
+	}
+}
