@@ -17,7 +17,9 @@ var once sync.Once
 // lockTable を使用したい場合必ずここから呼び出す。さもなければ、関数ごとに mu が作成されてうまく共有されなくなってしまう....
 func GetInstanceOfLockTable() *LockTable {
 	once.Do(func() {
-		instance = &LockTable{}
+		instance = &LockTable{
+			table: make(map[files.Block]int),
+		}
 	})
 	return instance
 }

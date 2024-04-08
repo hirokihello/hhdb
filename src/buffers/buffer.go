@@ -7,27 +7,29 @@ import (
 
 type Buffer struct {
 	fileManager *files.Manager // buffer manager が作り出した buffer pool 共通の file manager
-	logManager  logs.Manager // buffer manager が作り出した buffer pool 共通のログ管理オブジェクト。これを使って transaction の結果のログを書き出していく
+	logManager  logs.Manager   // buffer manager が作り出した buffer pool 共通のログ管理オブジェクト。これを使って transaction の結果のログを書き出していく
 	block       *files.Block
 	contents    *files.Page // メモリにロードした中身を保持して返却する
-	pins        int        // 幾つのクライアントから pin されているかを管理
-	txNum       int        // transaction 番号
-	lsn         int        // 変更があった場合、どのログに書き込まれているのかを保持する
+	pins        int         // 幾つのクライアントから pin されているかを管理
+	txNum       int         // transaction 番号
+	lsn         int         // 変更があった場合、どのログに書き込まれているのかを保持する
 }
 
 func CreateBuffer(fileManager *files.Manager, logManager logs.Manager) *Buffer {
+	page := files.CreatePage(fileManager.BlockSize)
 	return &Buffer{
 		fileManager: fileManager,
 		logManager:  logManager,
 		block:       nil,
-		contents:    files.CreatePage(fileManager.BlockSize),
+		contents:    &page,
 		pins:        0,
 		txNum:       -1,
 		lsn:         -1,
 	}
 }
 
-// 変更された場合に、ログのレコードと transaction の情報を更新する
+// ログのレコードと transaction の情報を更新する
+// lsn を更新しない場合は、lsn に 0 未満の値を設定する
 func (buffer *Buffer) SetModified(txNum int, lsn int) {
 	buffer.txNum = txNum
 	if lsn >= 0 {
@@ -52,7 +54,7 @@ func (buffer *Buffer) AssignToBlock(block *files.Block) {
 	buffer.block = block
 
 	// 新しく読み込んだブロックの内容をメモリ上のページに読み込む
-	buffer.fileManager.Read(*buffer.block, buffer.Contents())
+	buffer.fileManager.Read(*buffer.block, *buffer.Contents())
 
 	// pin の初期化
 	buffer.pins = 0
@@ -62,7 +64,7 @@ func (buffer *Buffer) AssignToBlock(block *files.Block) {
 func (buffer *Buffer) flush() {
 	if buffer.txNum >= 0 {
 		buffer.logManager.Flush(buffer.lsn)
-		buffer.fileManager.Write(*buffer.block, buffer.Contents())
+		buffer.fileManager.Write(*buffer.block, *buffer.Contents())
 		buffer.txNum = -1
 	}
 }
@@ -75,11 +77,10 @@ func (buffer *Buffer) Unpin() {
 	buffer.pins--
 }
 
-func (buffer *Buffer) Contents() files.Page {
+func (buffer *Buffer) Contents() *files.Page {
 	return buffer.contents
 }
 
-
-func (buffer *Buffer) Block() files.Block {
+func (buffer *Buffer) Block() *files.Block {
 	return buffer.block
 }

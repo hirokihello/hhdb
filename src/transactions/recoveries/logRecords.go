@@ -40,5 +40,7 @@ func CreateLogRecord(bytes []byte) LogRecord {
 		return CreateSetIntRecord(p)
 	case SETSTRING:
 		return CreateSetStringRecord(p)
+	default:
+		return nil
 	}
 }

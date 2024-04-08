@@ -33,7 +33,7 @@ func (manager *Manager) XLock(blk files.Block) {
 }
 
 // この manager で保持している全てのロックを解除する
-func (manager *Manager) Release(blk files.Block) {
+func (manager *Manager) Release() {
 	for key := range manager.locks {
 		manager.lockTable.UnLock(key)
 		delete(manager.locks, key)
@@ -48,5 +48,6 @@ func (manager *Manager) hasXLock(blk files.Block) bool {
 func CreateConcurrencyManager() *Manager {
 	return &Manager{
 		lockTable: GetInstanceOfLockTable(),
+		locks:     make(map[files.Block]string),
 	}
 }

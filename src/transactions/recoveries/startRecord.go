@@ -1,6 +1,8 @@
 package recoveries
 
 import (
+	"strconv"
+
 	"github.com/hirokihello/hhdb/src/db"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
@@ -22,7 +24,7 @@ func (startRecord StartRecord) TxNumber() int {
 func (startRecord StartRecord) Undo() {}
 
 func (startRecord StartRecord) ToString() string {
-	return "<COMMIT " + string(startRecord.txnum) + ">"
+	return "<COMMIT " + strconv.Itoa(startRecord.txnum) + ">"
 }
 
 func StartRecordWriteToLog(lm logs.Manager, txnum int) int {

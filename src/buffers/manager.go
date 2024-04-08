@@ -2,6 +2,8 @@ package buffers
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -31,8 +33,11 @@ func (manager *Manager) FlushAll(txnum int) {
 	defer manager.mu.Unlock()
 
 	for _, buffer := range manager.bufferPool {
+		fmt.Printf("ransaction id %d: value =" + strconv.Itoa(buffer.Contents().GetInt(80)) + "\n", txnum)
 		// 現在修正したトランザクション id と一致する場合に flush で書き込む
 		if buffer.ModifyingTx() == txnum {
+
+			fmt.Printf("transaction id %d was committed !!! at the buffer manager flush all methods\n", txnum)
 			buffer.flush()
 		}
 	}

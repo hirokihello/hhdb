@@ -6,7 +6,7 @@ import (
 	"github.com/hirokihello/hhdb/src/db"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
-	"github.com/hirokihello/hhdb/src/transactionInterface"
+	"github.com/hirokihello/hhdb/src/transactions/interfaces"
 )
 
 type StringLogRecord struct {

@@ -9,9 +9,9 @@ import (
 
 type RecoveryManager struct {
 	logManager    logs.Manager
-	bufferManager buffers.Manager
+	bufferManager *buffers.Manager
 	tx            any // 困ったら transaction interface を利用しよう。それまではこれでお茶を濁す
-	txnum         int
+	txNum         int
 }
 
 // 何かログに書き込みたい時は、この struct に implement されているメソッドの中から選んで実行する
@@ -19,9 +19,10 @@ type RecoveryManager struct {
 // この manager が呼び出されたトランザクションの commit を実行したいときに呼び出す
 func (manager RecoveryManager) Commit() {
 	// buffer pool 上での全ての変更をディスクに書き込む
-	manager.bufferManager.FlushAll(manager.txnum)
-	// そのトランザクションの commit log をログに書き込む
-	lsn := CommitWriteRecordToLog(manager.logManager, manager.txnum)
+	manager.bufferManager.FlushAll(manager.txNum)
+
+	// そのトランザクションの commit log をログに書き込むため、ログをページ上に作成する
+	lsn := CommitWriteRecordToLog(manager.logManager, manager.txNum)
 	//　ログを保存して、transaction が確実に記録に残るようにする
 	manager.logManager.Flush(lsn)
 }
@@ -31,9 +32,9 @@ func (manager RecoveryManager) Rollback() {
 	// rollback　を行う
 	manager.doRollback()
 	// ディスクに変更を書き込む
-	manager.bufferManager.FlushAll(manager.txnum)
+	manager.bufferManager.FlushAll(manager.txNum)
 	// そのトランザクションの rollback log をログに書き込む
-	lsn := RollbackRecordWriteToLog(manager.logManager, manager.txnum)
+	lsn := RollbackRecordWriteToLog(manager.logManager, manager.txNum)
 	//　ログを保存して、transaction が確実に記録に残るようにする
 	manager.logManager.Flush(lsn)
 }
@@ -41,25 +42,25 @@ func (manager RecoveryManager) Rollback() {
 func (manager RecoveryManager) Recover() {
 	manager.doRecover()
 	// ディスクに変更を書き込む
-	manager.bufferManager.FlushAll(manager.txnum)
+	manager.bufferManager.FlushAll(manager.txNum)
 	// そのトランザクションの checkpoint log をログに書き込む
 	lsn := CheckpointRecordWriteToLog(manager.logManager)
 	//　ログを保存して、transaction が確実に記録に残るようにする
 	manager.logManager.Flush(lsn)
 }
 
-func (manager RecoveryManager) SetInt(buffer buffers.Buffer, offset int, newval int) int {
+func (manager RecoveryManager) SetInt(buffer *buffers.Buffer, offset int, newval int) int {
 	oldval := buffer.Contents().GetInt(offset)
 	block := buffer.Block()
 
-	return SetIntRecordWriteToLog(manager.logManager, manager.txnum, block, offset, oldval)
+	return SetIntRecordWriteToLog(manager.logManager, manager.txNum, *block, offset, oldval)
 }
 
-func (manager RecoveryManager) SetString(buffer buffers.Buffer, offset int, newval string) int {
+func (manager RecoveryManager) SetString(buffer *buffers.Buffer, offset int, newval string) int {
 	oldval := buffer.Contents().GetString(offset)
 	block := buffer.Block()
 
-	return SetStringRecordWriteToLog(manager.logManager, manager.txnum, block, offset, oldval)
+	return SetStringRecordWriteToLog(manager.logManager, manager.txNum, *block, offset, oldval)
 }
 
 func (manager RecoveryManager) doRollback() {
@@ -70,7 +71,7 @@ func (manager RecoveryManager) doRollback() {
 		rec := CreateLogRecord(bytes)
 
 		//　読み込んだレコードが、このリカバリーマネージャーを作っているトランザクションと一致している場合、undo して切り戻す
-		if rec.TxNumber() == manager.txnum {
+		if rec.TxNumber() == manager.txNum {
 			// このトランザクションの start record まで遡ったら、それ以上戻す必要のある record はないはずなので処理を収量」
 			if rec.Op() == START {
 				return
@@ -108,14 +109,16 @@ func (manager RecoveryManager) doRecover() {
 
 func CreateRecoveryManager(
 	logManager logs.Manager,
-	bufferManager buffers.Manager,
+	bufferManager *buffers.Manager,
 	tx transactionInterface.TransactionInterface,
-	txnum int,
+	txNum int,
 ) *RecoveryManager {
+	StartRecordWriteToLog(logManager, txNum);
+
 	return &RecoveryManager{
-		logManager: logManager,
+		logManager:    logManager,
 		bufferManager: bufferManager,
-		tx: tx,
-		txnum: txnum,
+		tx:            tx,
+		txNum:         txNum,
 	}
 }

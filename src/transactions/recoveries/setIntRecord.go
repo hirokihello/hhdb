@@ -6,7 +6,7 @@ import (
 	"github.com/hirokihello/hhdb/src/db"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
-	"github.com/hirokihello/hhdb/src/transactionInterface"
+	"github.com/hirokihello/hhdb/src/transactions/interfaces"
 )
 
 type SetIntLogRecord struct {
@@ -70,11 +70,10 @@ func (setIntLogRecord SetIntLogRecord) ToString() string {
 		">"
 }
 
-
 func (setIntLogRecord SetIntLogRecord) UnDo(transaction transactionInterface.TransactionInterface) {
 	transaction.Pin(setIntLogRecord.blk)
 	// 記録されているのが古い value なので、それを transaction のブロックにセットし直す
-	transaction.SetString(setIntLogRecord.blk, setIntLogRecord.offset, setIntLogRecord.val, false)
+	transaction.SetInt(setIntLogRecord.blk, setIntLogRecord.offset, setIntLogRecord.val, false)
 	transaction.Unpin(setIntLogRecord.blk)
 }
 
