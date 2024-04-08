@@ -1,23 +1,23 @@
 package recoveries
 
 import (
-	"slices"
-
 	"github.com/hirokihello/hhdb/src/buffers"
 	"github.com/hirokihello/hhdb/src/logs"
+	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
+	"golang.org/x/exp/slices"
 )
 
-type Manager struct {
+type RecoveryManager struct {
 	logManager    logs.Manager
 	bufferManager buffers.Manager
-	tx            transactions.Transaction
+	tx            any // 困ったら transaction interface を利用しよう。それまではこれでお茶を濁す
 	txnum         int
 }
 
 // 何かログに書き込みたい時は、この struct に implement されているメソッドの中から選んで実行する
 
 // この manager が呼び出されたトランザクションの commit を実行したいときに呼び出す
-func (manager Manager) Commit() {
+func (manager RecoveryManager) Commit() {
 	// buffer pool 上での全ての変更をディスクに書き込む
 	manager.bufferManager.FlushAll(manager.txnum)
 	// そのトランザクションの commit log をログに書き込む
@@ -27,7 +27,7 @@ func (manager Manager) Commit() {
 }
 
 // この manager が呼び出されたトランザクションの rollback を実行したいときに呼び出す
-func (manager Manager) Rollback() {
+func (manager RecoveryManager) Rollback() {
 	// rollback　を行う
 	manager.doRollback()
 	// ディスクに変更を書き込む
@@ -38,7 +38,7 @@ func (manager Manager) Rollback() {
 	manager.logManager.Flush(lsn)
 }
 
-func (manager Manager) Recover() {
+func (manager RecoveryManager) Recover() {
 	manager.doRecover()
 	// ディスクに変更を書き込む
 	manager.bufferManager.FlushAll(manager.txnum)
@@ -48,21 +48,21 @@ func (manager Manager) Recover() {
 	manager.logManager.Flush(lsn)
 }
 
-func (manager Manager) SetInt(buffer buffers.Buffer, offset int, newval int) int {
+func (manager RecoveryManager) SetInt(buffer buffers.Buffer, offset int, newval int) int {
 	oldval := buffer.Contents().GetInt(offset)
 	block := buffer.Block()
 
 	return SetIntRecordWriteToLog(manager.logManager, manager.txnum, block, offset, oldval)
 }
 
-func (manager Manager) SetString(buffer buffers.Buffer, offset int, newval string) int {
+func (manager RecoveryManager) SetString(buffer buffers.Buffer, offset int, newval string) int {
 	oldval := buffer.Contents().GetString(offset)
 	block := buffer.Block()
 
 	return SetStringRecordWriteToLog(manager.logManager, manager.txnum, block, offset, oldval)
 }
 
-func (manager Manager) doRollback() {
+func (manager RecoveryManager) doRollback() {
 	iterator := manager.logManager.Iterator()
 
 	for iterator.HasNext() {
@@ -82,7 +82,7 @@ func (manager Manager) doRollback() {
 }
 
 // recovery を行うための関数
-func (manager Manager) doRecover() {
+func (manager RecoveryManager) doRecover() {
 	var finishedTxs []int
 	iterator := manager.logManager.Iterator()
 
@@ -99,9 +99,23 @@ func (manager Manager) doRecover() {
 		if record.Op() == COMMIT || record.Op() == ROLLBACK {
 			finishedTxs = append(finishedTxs, record.TxNumber())
 
-		// 終了したことが記録されていない変更ログなので、変更前の値に戻す
-		} else if slices.Contains(finishedTxs, record.TxNumber) {
+			// 終了したことが記録されていない変更ログなので、変更前の値に戻す
+		} else if slices.Contains(finishedTxs, record.TxNumber()) {
 			record.Undo()
 		}
+	}
+}
+
+func CreateRecoveryManager(
+	logManager logs.Manager,
+	bufferManager buffers.Manager,
+	tx transactionInterface.TransactionInterface,
+	txnum int,
+) *RecoveryManager {
+	return &RecoveryManager{
+		logManager: logManager,
+		bufferManager: bufferManager,
+		tx: tx,
+		txnum: txnum,
 	}
 }
