@@ -31,7 +31,7 @@ func (schema *Schema) AddStringField(fieldName string, length int) {
 }
 
 func (schema *Schema) Add(fieldName string, s Schema) {
-	schema.AddField(fieldName, s.fieldType(fieldName), s.length(fieldName))
+	schema.AddField(fieldName, s.Type(fieldName), s.Length(fieldName))
 }
 
 func (schema *Schema) addAll(s Schema) {

@@ -1,2 +1,62 @@
 package records
 
+import (
+	"github.com/hirokihello/hhdb/src/db"
+	"github.com/hirokihello/hhdb/src/files"
+)
+
+type Layout struct {
+	schema   *Schema
+	offsets  map[string]int
+	slotSize int
+}
+
+func CreateLayout(schema *Schema) *Layout {
+	layout := Layout{
+		schema:  schema,
+		offsets: make(map[string]int),
+	}
+	pos := db.INTEGER_BYTES // space for the empty / inuse flag
+	for fieldName := range schema.Fields() {
+		layout.offsets[fieldName] = pos
+		pos += layout.lengthInBytes(fieldName)
+	}
+	layout.slotSize = pos
+	return &layout
+}
+
+// そのフィールドの中身がどれくらいの領域を必要とするか
+func (layout *Layout) lengthInBytes(fieldName string) int {
+	fieldType := layout.schema.Type(fieldName)
+	if fieldType == INTERGER {
+		// int の場合は 4 byte
+		return db.INTEGER_BYTES
+	} else {
+		// つまり varchar の場合
+
+		// その領域の長さ + 4 byte(領域の長さを示す分)
+		return files.MaxLength(layout.schema.Length(fieldName))
+	}
+}
+
+func (layout *Layout) Schema() *Schema {
+	return layout.schema
+}
+
+func (layout *Layout) Offset(fieldName string) int {
+	return layout.offsets[fieldName]
+}
+
+func (layout *Layout) SlotSize() int {
+	return layout.slotSize
+}
+
+// すでに情報をプロセス上で持っているときに layout オブジェクトを扱いたいときに使用する
+func CreateLayoutByLoadingData(schema *Schema, offsets map[string]int, slotSize int) *Layout {
+	layout := Layout{
+		schema:   schema,
+		offsets:  offsets,
+		slotSize: slotSize,
+	}
+	return &layout
+}

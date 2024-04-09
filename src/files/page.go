@@ -86,6 +86,11 @@ func MaxLengthOfStringOnPage(str string) int {
 	return len(str) + 4
 }
 
+func MaxLength(strlen int) int {
+	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。
+	return strlen + 4
+}
+
 // page オブジェクトの中身を返す
 func (a Page) Contents() []byte {
 	// utf8で実装しておりアルファベットとintのみ受け付ける予定なので現状これで良い。

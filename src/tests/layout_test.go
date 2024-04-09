@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+
+	"github.com/hirokihello/hhdb/src/records"
 )
 
 func TestLayout(t *testing.T) {
@@ -14,6 +16,7 @@ func TestLayout(t *testing.T) {
 
 	for fieldName := range layout.Schema().Fields() {
 		offset := layout.Offset(fieldName)
-		fmt.Print(fieldName + " has offset: " + strconv.Atoi(offset))
+		// 4 / 8 になる。順番的に、最初の 4 byte. 次に int が 4 byte. 最後に string になるので。
+		fmt.Print(fieldName + " has offset: " + strconv.Itoa(offset) + "\n")
 	}
 }
