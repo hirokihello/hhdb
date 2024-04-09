@@ -14,7 +14,7 @@ type StartRecord struct {
 }
 
 func (startRecord StartRecord) Op() int {
-	return COMMIT
+	return START
 }
 
 func (startRecord StartRecord) TxNumber() int {
@@ -24,14 +24,14 @@ func (startRecord StartRecord) TxNumber() int {
 func (startRecord StartRecord) UnDo() {}
 
 func (startRecord StartRecord) ToString() string {
-	return "<COMMIT " + strconv.Itoa(startRecord.txnum) + ">"
+	return "<START " + strconv.Itoa(startRecord.txnum) + ">"
 }
 
 // log sequence number を返り値とする(他のメソッドも同様)
 func StartRecordWriteToLog(lm logs.Manager, txnum int) int {
 	rec := make([]byte, db.INTEGER_BYTES*2)
 	p := files.CreatePageByBytes(rec)
-	p.SetInt(0, COMMIT)
+	p.SetInt(0, START)
 	p.SetInt(db.INTEGER_BYTES, uint32(txnum))
 	return lm.Append(rec)
 }
