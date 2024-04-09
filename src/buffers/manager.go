@@ -33,18 +33,17 @@ func (manager *Manager) FlushAll(txnum int) {
 	defer manager.mu.Unlock()
 
 	for _, buffer := range manager.bufferPool {
-		fmt.Printf("ransaction id %d: value =" + strconv.Itoa(buffer.Contents().GetInt(80)) + "\n", txnum)
+		fmt.Printf("buffer manager FlushAll(txnum int): transaction id %d: value ="+strconv.Itoa(buffer.Contents().GetInt(80))+"\n", txnum)
 		// 現在修正したトランザクション id と一致する場合に flush で書き込む
 		if buffer.ModifyingTx() == txnum {
 
-			fmt.Printf("transaction id %d was committed !!! at the buffer manager flush all methods\n", txnum)
 			buffer.flush()
 		}
 	}
 }
 
-func (manager *Manager) Unpin(buffer *Buffer) {
-	buffer.Unpin()
+func (manager *Manager) UnPin(buffer *Buffer) {
+	buffer.UnPin()
 	// pin されていない場合
 	if !buffer.IsPinned() {
 		manager.numAvailableBuffer++
@@ -79,7 +78,7 @@ func (manager *Manager) tryToPin(block *files.Block) *Buffer {
 	// 読み込まれていない場合、どこかのバッファーに読み込む
 	if buffer == nil {
 		// 空いているバッファーがあれば、そこにブロックを読みこむ
-		buffer = manager.chooseUnpinnedBuffer()
+		buffer = manager.chooseUnPinnedBuffer()
 		// 読み込めなかった場合は nil を返す
 		if buffer == nil {
 			return nil
@@ -114,7 +113,7 @@ func (manager *Manager) findExistingBuffer(block *files.Block) *Buffer {
 }
 
 // 空いている buffer が存在すれば、それを返す。存在しなければ nil を返す
-func (manager *Manager) chooseUnpinnedBuffer() *Buffer {
+func (manager *Manager) chooseUnPinnedBuffer() *Buffer {
 	// ナイーブな実装。先頭から空いているか見ていく
 	for _, buffer := range manager.bufferPool {
 		if !buffer.IsPinned() {

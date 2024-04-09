@@ -1,6 +1,8 @@
 package recoveries
 
 import (
+	"fmt"
+
 	"github.com/hirokihello/hhdb/src/buffers"
 	"github.com/hirokihello/hhdb/src/logs"
 	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
@@ -10,7 +12,7 @@ import (
 type RecoveryManager struct {
 	logManager    logs.Manager
 	bufferManager *buffers.Manager
-	tx            any // 困ったら transaction interface を利用しよう。それまではこれでお茶を濁す
+	tx            transactionInterface.TransactionI // 困ったら transaction interface を利用しよう。それまではこれでお茶を濁す
 	txNum         int
 }
 
@@ -29,6 +31,8 @@ func (manager RecoveryManager) Commit() {
 
 // この manager が呼び出されたトランザクションの rollback を実行したいときに呼び出す
 func (manager RecoveryManager) Rollback() {
+	fmt.Print("\nrecovery manager: rollback will begin!!!!!\n")
+	// buffer pool 上での全ての変更をディスクに書き込む
 	// rollback　を行う
 	manager.doRollback()
 	// ディスクに変更を書き込む
@@ -48,6 +52,13 @@ func (manager RecoveryManager) Recover() {
 	//　ログを保存して、transaction が確実に記録に残るようにする
 	manager.logManager.Flush(lsn)
 }
+
+// func (manager RecoveryManager) FlushLogs() {
+// 	// そのトランザクションの checkpoint log をログに書き込む
+// 	lsn := CheckpointRecordWriteToLog(manager.logManager)
+// 	//　ログを保存して、transaction が確実に記録に残るようにする
+// 	manager.logManager.Flush(lsn)
+// }
 
 func (manager RecoveryManager) SetInt(buffer *buffers.Buffer, offset int, newval int) int {
 	oldval := buffer.Contents().GetInt(offset)
@@ -70,14 +81,30 @@ func (manager RecoveryManager) doRollback() {
 		bytes := iterator.Next()
 		rec := CreateLogRecord(bytes)
 
-		//　読み込んだレコードが、このリカバリーマネージャーを作っているトランザクションと一致している場合、undo して切り戻す
-		if rec.TxNumber() == manager.txNum {
-			// このトランザクションの start record まで遡ったら、それ以上戻す必要のある record はないはずなので処理を収量」
-			if rec.Op() == START {
-				return
-			}
+		if(rec != nil) {
+			fmt.Print("iterator has next\n")
+			fmt.Printf("rec: %T \n", rec)
+			fmt.Printf("Op: %d \n", rec.Op())
+			fmt.Printf("TxNumber: %d \n", rec.TxNumber())
+			fmt.Printf("manager.TxNum: %d \n", manager.txNum)
+			fmt.Print("iterator \n")
+			//　読み込んだレコードが、このリカバリーマネージャーを作っているトランザクションと一致している場合、undo して切り戻す
+			if rec.TxNumber() == manager.txNum {
+				// このトランザクションの start record まで遡ったら、それ以上戻す必要のある record はないはずなので処理を収量」
 
-			rec.Undo()
+				if rec.Op() == START {
+					return
+				}
+
+				// string / int の update record 以外は
+				switch record := rec.(type) {
+				case SetStringLogRecord:
+					record.UnDo(manager.tx)
+				case SetIntLogRecord:
+					record.UnDo(manager.tx)
+				default:
+				}
+			}
 		}
 	}
 }
@@ -85,6 +112,7 @@ func (manager RecoveryManager) doRollback() {
 // recovery を行うための関数
 func (manager RecoveryManager) doRecover() {
 	var finishedTxs []int
+	// iterator で、戻す必要のあるログがきちんと取得できていない。
 	iterator := manager.logManager.Iterator()
 
 	for iterator.HasNext() {
@@ -102,7 +130,13 @@ func (manager RecoveryManager) doRecover() {
 
 			// 終了したことが記録されていない変更ログなので、変更前の値に戻す
 		} else if slices.Contains(finishedTxs, record.TxNumber()) {
-			record.Undo()
+			switch rec := record.(type) {
+			case SetStringLogRecord:
+				rec.UnDo(manager.tx)
+			case SetIntLogRecord:
+				rec.UnDo(manager.tx)
+			default:
+			}
 		}
 	}
 }
@@ -110,10 +144,10 @@ func (manager RecoveryManager) doRecover() {
 func CreateRecoveryManager(
 	logManager logs.Manager,
 	bufferManager *buffers.Manager,
-	tx transactionInterface.TransactionInterface,
+	tx transactionInterface.TransactionI,
 	txNum int,
 ) *RecoveryManager {
-	StartRecordWriteToLog(logManager, txNum);
+	StartRecordWriteToLog(logManager, txNum)
 
 	return &RecoveryManager{
 		logManager:    logManager,

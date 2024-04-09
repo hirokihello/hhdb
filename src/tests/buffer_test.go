@@ -17,7 +17,7 @@ func TestBufferManager(t *testing.T) {
 	buffers[1], _ = bufferManager.Pin(&files.Block{FileName: "buffer_manager_test", Number: 1})
 	buffers[2], _ = bufferManager.Pin(&files.Block{FileName: "buffer_manager_test", Number: 2})
 
-	bufferManager.Unpin(buffers[1])
+	bufferManager.UnPin(buffers[1])
 	buffers[1] = nil
 
 	buffers[3], _ = bufferManager.Pin(&files.Block{FileName: "buffer_manager_test", Number: 0})
@@ -35,7 +35,7 @@ func TestBufferManager(t *testing.T) {
 		t.Errorf("buffer is nil, want not nil")
 	}
 
-	bufferManager.Unpin(buffers[2])
+	bufferManager.UnPin(buffers[2])
 	buffers[2] = nil
 
 	_, err2 := bufferManager.Pin(&files.Block{FileName: "buffer_manager_test", Number: 3})
@@ -60,7 +60,7 @@ func TestBuffer(t *testing.T) {
 	page.SetInt(80, uint32(n+1))
 
 	buffer1.SetModified(1, 0)
-	bufferManager.Unpin(buffer1)
+	bufferManager.UnPin(buffer1)
 
 	// 三つ全てのバッファーを使用している
 	if page.GetInt(80) != n+1 {
@@ -71,11 +71,11 @@ func TestBuffer(t *testing.T) {
 	bufferManager.Pin(&files.Block{FileName: "buffer_test", Number: 2})
 	bufferManager.Pin(&files.Block{FileName: "buffer_test", Number: 3})
 
-	bufferManager.Unpin(buffer2)
+	bufferManager.UnPin(buffer2)
 
 	buffer2, _ = bufferManager.Pin(&files.Block{FileName: "buffer_test", Number: 0})
 	page2 := buffer2.Contents()
 	page2.SetInt(80, uint32(10000000))
 	buffer2.SetModified(1, 0)
-	bufferManager.Unpin(buffer2)
+	bufferManager.UnPin(buffer2)
 }

@@ -7,15 +7,15 @@ import (
 	"github.com/hirokihello/hhdb/src/buffers"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
-	"github.com/hirokihello/hhdb/src/transactions/concurrencies"
 	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
+	"github.com/hirokihello/hhdb/src/transactions/concurrencies"
 	"github.com/hirokihello/hhdb/src/transactions/recoveries"
 )
 
 const END_OF_FILE int = -1
 
 type Transaction struct {
-	transactionInterface.TransactionInterface
+	transactionInterface.TransactionI
 	recoveryManager    *recoveries.RecoveryManager
 	concurrencyManager *concurrencies.Manager
 	bufferManager      *buffers.Manager
@@ -47,6 +47,7 @@ func (transaction *Transaction) TxNum() int {
 
 func (transaction *Transaction) Commit() {
 	transaction.recoveryManager.Commit()
+	// 保持していた buffer を全て解放する
 	transaction.concurrencyManager.Release()
 	transaction.myBuffers.unpinAll()
 	fmt.Printf("transaction id %d was committed\n", transaction.txNum)
@@ -64,11 +65,12 @@ func (Transaction *Transaction) Recover() {
 	Transaction.recoveryManager.Recover()
 }
 
+// この処理をして初めて、buffer にロードして使用できるようになる。必要なブロックは全て pin すること。
 func (transaction *Transaction) Pin(blk files.Block) {
 	transaction.myBuffers.pin(blk)
 }
 
-func (transaction *Transaction) Unpin(blk files.Block) {
+func (transaction *Transaction) UnPin(blk files.Block) {
 	transaction.myBuffers.unPin(blk)
 }
 
@@ -94,6 +96,7 @@ func (transaction *Transaction) SetInt(blk files.Block, offset int, val int, okt
 	buffer := transaction.myBuffers.getBuffer(blk)
 	lsn := -1
 	if oktolog {
+		fmt.Print("\n SetInt(blk files.Block, offset int, val int, oktolog bool) loggggeddddd \n ")
 		lsn = transaction.recoveryManager.SetInt(buffer, offset, val)
 	}
 	p := buffer.Contents()
@@ -109,17 +112,10 @@ func (transaction *Transaction) SetString(blk files.Block, offset int, val strin
 	if oktolog {
 		lsn = transaction.recoveryManager.SetString(buffer, offset, val)
 	}
-	fmt.Print("\n ↓ buffer.ModifyingTx() の結果\n")
-	fmt.Print(buffer.ModifyingTx())
-	fmt.Print("\n ↑ buffer.ModifyingTx() の結果\n")
 	p := buffer.Contents()
 	p.SetString(offset, val)
 	// oktolog が true であれば、その buffer の lsn を更新してログに記録が残るようにする
 	buffer.SetModified(transaction.txNum, lsn)
-
-	fmt.Print("\n ↓ buffer.ModifyingTx() の結果\n")
-	fmt.Print(buffer.ModifyingTx())
-	fmt.Print("\n ↑ buffer.ModifyingTx() の結果\n")
 }
 
 // ファイルに含まれるブロック数を返却する

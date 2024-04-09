@@ -1,15 +1,16 @@
 package recoveries
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/hirokihello/hhdb/src/db"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
-	"github.com/hirokihello/hhdb/src/transactions/interfaces"
+	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
 )
 
-type StringLogRecord struct {
+type SetStringLogRecord struct {
 	LogRecord
 	txnum  int
 	offset int
@@ -17,7 +18,7 @@ type StringLogRecord struct {
 	val    string
 }
 
-func CreateSetStringRecord(p files.Page) StringLogRecord {
+func CreateSetStringRecord(p files.Page) SetStringLogRecord {
 	// recovery manager の page の使い方に則る。
 
 	// 4 byte 目に格納されている transaction number を取得する
@@ -42,7 +43,16 @@ func CreateSetStringRecord(p files.Page) StringLogRecord {
 	vpos := ops + db.INTEGER_BYTES
 	val := p.GetString(vpos)
 
-	return StringLogRecord{
+	fmt.Print("\n")
+	fmt.Print(txnum)
+	fmt.Print("\n")
+	fmt.Print(offset)
+	fmt.Print("\n")
+	fmt.Print(blk)
+	fmt.Print("\n")
+	fmt.Print(val)
+	fmt.Print("\n")
+	return SetStringLogRecord{
 		txnum:  txnum,
 		offset: offset,
 		blk:    blk,
@@ -50,15 +60,15 @@ func CreateSetStringRecord(p files.Page) StringLogRecord {
 	}
 }
 
-func (stringLogRecord StringLogRecord) Op() int {
+func (stringLogRecord SetStringLogRecord) Op() int {
 	return SETSTRING
 }
 
-func (stringLogRecord StringLogRecord) Txnumber() int {
+func (stringLogRecord SetStringLogRecord) TxNumber() int {
 	return stringLogRecord.txnum
 }
 
-func (stringLogRecord StringLogRecord) ToString() string {
+func (stringLogRecord SetStringLogRecord) ToString() string {
 	return "<SETSTRING " +
 		strconv.Itoa(stringLogRecord.txnum) +
 		" " +
@@ -70,11 +80,11 @@ func (stringLogRecord StringLogRecord) ToString() string {
 		">"
 }
 
-func (stringLogRecord StringLogRecord) UnDo(transaction transactionInterface.TransactionInterface) {
+func (stringLogRecord SetStringLogRecord) UnDo(transaction transactionInterface.TransactionI) {
 	transaction.Pin(stringLogRecord.blk)
 	// 記録されているのが古い value なので、それを transaction のブロックにセットし直す
 	transaction.SetString(stringLogRecord.blk, stringLogRecord.offset, stringLogRecord.val, false)
-	transaction.Unpin(stringLogRecord.blk)
+	transaction.UnPin(stringLogRecord.blk)
 }
 
 func SetStringRecordWriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val string) int {
@@ -88,12 +98,12 @@ func SetStringRecordWriteToLog(lm logs.Manager, txnum int, blk files.Block, offs
 	rec := make([]byte, reclen)
 	p := files.CreatePageByBytes(rec)
 
-	p.SetInt(0, SETSTRING)
-	p.SetInt(tpos, uint32(txnum))
-	p.SetString(fpos, blk.FileName)
-	p.SetInt(bpos, uint32(blk.Number))
-	p.SetInt(opos, uint32(offset))
-	p.SetString(vpos, val)
+	p.SetInt(0, SETSTRING)             // 最初の 4 bytes に種類
+	p.SetInt(tpos, uint32(txnum))      // 次の 4 byte に transaction number
+	p.SetString(fpos, blk.FileName)    // 次に操作したファイル名
+	p.SetInt(bpos, uint32(blk.Number)) // 4 byte で block 番号
+	p.SetInt(opos, uint32(offset))     // 4 byte で ブロックの変更したオフセット
+	p.SetString(vpos, val)             // 文字列
 
 	return lm.Append(p.Contents())
 }

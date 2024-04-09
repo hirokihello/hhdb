@@ -21,12 +21,13 @@ func (startRecord StartRecord) TxNumber() int {
 	return startRecord.txnum
 }
 
-func (startRecord StartRecord) Undo() {}
+func (startRecord StartRecord) UnDo() {}
 
 func (startRecord StartRecord) ToString() string {
 	return "<COMMIT " + strconv.Itoa(startRecord.txnum) + ">"
 }
 
+// log sequence number を返り値とする(他のメソッドも同様)
 func StartRecordWriteToLog(lm logs.Manager, txnum int) int {
 	rec := make([]byte, db.INTEGER_BYTES*2)
 	p := files.CreatePageByBytes(rec)

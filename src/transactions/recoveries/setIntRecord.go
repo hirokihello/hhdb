@@ -1,12 +1,13 @@
 package recoveries
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/hirokihello/hhdb/src/db"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
-	"github.com/hirokihello/hhdb/src/transactions/interfaces"
+	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
 )
 
 type SetIntLogRecord struct {
@@ -54,7 +55,7 @@ func (setIntLogRecord SetIntLogRecord) Op() int {
 	return SETINT
 }
 
-func (setIntLogRecord SetIntLogRecord) Txnumber() int {
+func (setIntLogRecord SetIntLogRecord) TxNumber() int {
 	return setIntLogRecord.txnum
 }
 
@@ -70,11 +71,12 @@ func (setIntLogRecord SetIntLogRecord) ToString() string {
 		">"
 }
 
-func (setIntLogRecord SetIntLogRecord) UnDo(transaction transactionInterface.TransactionInterface) {
+func (setIntLogRecord SetIntLogRecord) UnDo(transaction transactionInterface.TransactionI) {
 	transaction.Pin(setIntLogRecord.blk)
 	// 記録されているのが古い value なので、それを transaction のブロックにセットし直す
+	fmt.Print("un doing \n")
 	transaction.SetInt(setIntLogRecord.blk, setIntLogRecord.offset, setIntLogRecord.val, false)
-	transaction.Unpin(setIntLogRecord.blk)
+	transaction.UnPin(setIntLogRecord.blk)
 }
 
 func SetIntRecordWriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val int) int {
@@ -95,5 +97,6 @@ func SetIntRecordWriteToLog(lm logs.Manager, txnum int, blk files.Block, offset 
 	p.SetInt(opos, uint32(offset))
 	p.SetInt(vpos, uint32(val))
 
-	return lm.Append(p.Contents())
+	res := lm.Append(p.Contents())
+	return res
 }

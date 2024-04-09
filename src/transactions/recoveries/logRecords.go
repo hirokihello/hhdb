@@ -21,7 +21,6 @@ const SETSTRING = 5
 type LogRecord interface {
 	Op() int
 	TxNumber() int
-	Undo()
 }
 
 func CreateLogRecord(bytes []byte) LogRecord {

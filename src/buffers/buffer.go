@@ -73,7 +73,7 @@ func (buffer *Buffer) Pin() {
 	buffer.pins++
 }
 
-func (buffer *Buffer) Unpin() {
+func (buffer *Buffer) UnPin() {
 	buffer.pins--
 }
 

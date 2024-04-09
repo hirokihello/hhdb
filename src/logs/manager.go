@@ -37,6 +37,7 @@ func (manager *Manager) Flush(lsn int) {
 
 // iterator
 func (manager *Manager) Iterator() *Iterator {
+	manager.Flush(manager.lastSavedLSN)
 	return createLogIterator(manager.fileManager, manager.currentBlock)
 }
 

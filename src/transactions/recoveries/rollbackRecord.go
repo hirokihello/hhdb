@@ -19,7 +19,7 @@ func (rollbackRecord RollbackRecord) TxNumber() int {
 	return rollbackRecord.txnum
 }
 
-func (rollbackRecord RollbackRecord) Undo() {}
+func (rollbackRecord RollbackRecord) UnDo() {}
 
 func (rollbackRecord RollbackRecord) ToString() string {
 	return "<CHECKPOINT>"
