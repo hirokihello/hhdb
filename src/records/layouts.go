@@ -1,7 +1,7 @@
 package records
 
 import (
-	"github.com/hirokihello/hhdb/src/db"
+	"github.com/hirokihello/hhdb/src/consts"
 	"github.com/hirokihello/hhdb/src/files"
 )
 
@@ -16,7 +16,7 @@ func CreateLayout(schema *Schema) *Layout {
 		schema:  schema,
 		offsets: make(map[string]int),
 	}
-	pos := db.INTEGER_BYTES // space for the empty / inuse flag
+	pos := consts.INTEGER_BYTES // space for the empty / inuse flag
 	for fieldName := range schema.Fields() {
 		layout.offsets[fieldName] = pos
 		pos += layout.lengthInBytes(fieldName)
@@ -30,7 +30,7 @@ func (layout *Layout) lengthInBytes(fieldName string) int {
 	fieldType := layout.schema.Type(fieldName)
 	if fieldType == INTERGER {
 		// int の場合は 4 byte
-		return db.INTEGER_BYTES
+		return consts.INTEGER_BYTES
 	} else {
 		// つまり varchar の場合
 

@@ -1,7 +1,7 @@
 package recoveries
 
 import (
-	"github.com/hirokihello/hhdb/src/db"
+	"github.com/hirokihello/hhdb/src/consts"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
 )
@@ -25,7 +25,7 @@ func (checkpointLogRecord CheckpointLogRecord) ToString() string {
 }
 
 func CheckpointRecordWriteToLog(lm logs.Manager) int {
-	rec := make([]byte, db.INTEGER_BYTES)
+	rec := make([]byte, consts.INTEGER_BYTES)
 	p := files.CreatePageByBytes(rec)
 	p.SetInt(0, CHECKPOINT)
 	return lm.Append(rec)

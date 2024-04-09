@@ -4,9 +4,8 @@ import (
 	"github.com/hirokihello/hhdb/src/buffers"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
+	"github.com/hirokihello/hhdb/src/transactions"
 )
-
-const INTEGER_BYTES = 4;
 
 type Db struct {
 	FileManager   *files.Manager
@@ -24,4 +23,8 @@ func CreateDB(path string, blockSize int, bufferPoolCount int) Db {
 		LogManager:    logManager,
 		BufferManager: bufferManager,
 	}
+}
+
+func (d *Db) CreateNewTransaction() *transactions.Transaction {
+	return transactions.CreateTransaction(d.FileManager, d.LogManager, d.BufferManager)
 }

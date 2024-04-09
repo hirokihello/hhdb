@@ -81,7 +81,7 @@ func (manager RecoveryManager) doRollback() {
 		bytes := iterator.Next()
 		rec := CreateLogRecord(bytes)
 
-		if(rec != nil) {
+		if rec != nil {
 			fmt.Print("iterator has next\n")
 			fmt.Printf("rec: %T \n", rec)
 			fmt.Printf("Op: %d \n", rec.Op())

@@ -7,8 +7,8 @@ import (
 	"github.com/hirokihello/hhdb/src/buffers"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
-	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
 	"github.com/hirokihello/hhdb/src/transactions/concurrencies"
+	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
 	"github.com/hirokihello/hhdb/src/transactions/recoveries"
 )
 

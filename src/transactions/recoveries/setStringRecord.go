@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hirokihello/hhdb/src/db"
+	"github.com/hirokihello/hhdb/src/consts"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/logs"
 	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
@@ -23,11 +23,11 @@ func CreateSetStringRecord(p files.Page) SetStringLogRecord {
 
 	// 4 byte 目に格納されている transaction number を取得する
 	// 最初の 4 byte にはそのレコードの長さが格納されているため、その次に transaction id が必要になる
-	tpos := db.INTEGER_BYTES
+	tpos := consts.INTEGER_BYTES
 	txnum := p.GetInt(tpos)
 
 	// 次に格納されているのはファイル名
-	fpos := tpos + db.INTEGER_BYTES
+	fpos := tpos + consts.INTEGER_BYTES
 	filename := p.GetString(fpos)
 
 	// 次に格納されているのは、block 情報
@@ -36,11 +36,11 @@ func CreateSetStringRecord(p files.Page) SetStringLogRecord {
 	blk := files.Block{FileName: filename, Number: blknum}
 
 	// 次に格納されているのは、どんな種類のログレコードかを表す数値
-	ops := bpos + db.INTEGER_BYTES
+	ops := bpos + consts.INTEGER_BYTES
 	offset := p.GetInt(ops)
 
 	// 最後にログの内容の string
-	vpos := ops + db.INTEGER_BYTES
+	vpos := ops + consts.INTEGER_BYTES
 	val := p.GetString(vpos)
 
 	fmt.Print("\n")
@@ -88,11 +88,11 @@ func (stringLogRecord SetStringLogRecord) UnDo(transaction transactionInterface.
 }
 
 func SetStringRecordWriteToLog(lm logs.Manager, txnum int, blk files.Block, offset int, val string) int {
-	tpos := db.INTEGER_BYTES
-	fpos := tpos + db.INTEGER_BYTES
+	tpos := consts.INTEGER_BYTES
+	fpos := tpos + consts.INTEGER_BYTES
 	bpos := fpos + files.MaxLengthOfStringOnPage(blk.FileName)
-	opos := bpos + db.INTEGER_BYTES
-	vpos := opos + db.INTEGER_BYTES
+	opos := bpos + consts.INTEGER_BYTES
+	vpos := opos + consts.INTEGER_BYTES
 	reclen := vpos + files.MaxLengthOfStringOnPage(val)
 
 	rec := make([]byte, reclen)
