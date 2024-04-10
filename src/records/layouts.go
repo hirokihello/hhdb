@@ -39,6 +39,7 @@ func (layout *Layout) lengthInBytes(fieldName string) int {
 	}
 }
 
+// 保持している schema 情報を扱えるオブジェクトを返却する
 func (layout *Layout) Schema() *Schema {
 	return layout.schema
 }

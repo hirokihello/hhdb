@@ -74,12 +74,14 @@ func (transaction *Transaction) UnPin(blk files.Block) {
 	transaction.myBuffers.unPin(blk)
 }
 
+// block と offset を受け取ることで、そこからデータを取得
 func (transaction *Transaction) GetInt(blk files.Block, offset int) int {
 	transaction.concurrencyManager.SLock(blk)
 	buffer := transaction.myBuffers.getBuffer(blk)
 	return buffer.Contents().GetInt(offset)
 }
 
+// block と offset を受け取ることで、そこからデータを取得
 func (transaction *Transaction) GetString(blk files.Block, offset int) string {
 	transaction.concurrencyManager.SLock(blk)
 	buffer := transaction.myBuffers.getBuffer(blk)
