@@ -84,10 +84,6 @@ func (transaction *Transaction) GetString(blk files.Block, offset int) string {
 	transaction.concurrencyManager.SLock(blk)
 	buffer := transaction.myBuffers.getBuffer(blk)
 
-	fmt.Print("\n ↓ GetString buffer.ModifyingTx() の結果\n")
-	fmt.Print(buffer.ModifyingTx())
-	fmt.Print("\n ↑ GetString buffer.ModifyingTx() の結果\n")
-
 	return buffer.Contents().GetString(offset)
 }
 
@@ -96,7 +92,7 @@ func (transaction *Transaction) SetInt(blk files.Block, offset int, val int, okt
 	buffer := transaction.myBuffers.getBuffer(blk)
 	lsn := -1
 	if oktolog {
-		fmt.Print("\n SetInt(blk files.Block, offset int, val int, oktolog bool) loggggeddddd \n ")
+		// fmt.Print("\n SetInt(blk files.Block, offset int, val int, oktolog bool) loggggeddddd \n")
 		lsn = transaction.recoveryManager.SetInt(buffer, offset, val)
 	}
 	p := buffer.Contents()
@@ -135,7 +131,7 @@ func (transaction *Transaction) Append(fileName string) *files.Block {
 	return transaction.fileManager.Append(fileName)
 }
 
-func (transaction *Transaction) blockSize() int {
+func (transaction *Transaction) BlockSize() int {
 	return transaction.fileManager.BlockSize
 }
 
