@@ -76,7 +76,7 @@ func (manager *Manager) Append(logRecord []byte) int {
 // page の内容をファイルに書き込む
 func (manager *Manager) flush() {
 
-	fmt.Printf("flushed block id: %d\n", manager.currentBlock.Number)
+	// fmt.Printf("flushed block id: %d\n", manager.currentBlock.Number)
 	// ファイルマネージャーを用いて、現在のログページの内容を、ファイルに書き込み
 	manager.fileManager.Write(manager.currentBlock, manager.logPage)
 	// 最後に保存したログを最新のものに更新

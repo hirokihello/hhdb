@@ -1,6 +1,8 @@
 package records
 
 import (
+	"fmt"
+
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/queries"
 	"github.com/hirokihello/hhdb/src/transactions"
@@ -20,6 +22,7 @@ func CreateTableScan(transaction *transactions.Transaction, tableName string, la
 		fileName:    tableName + ".tbl",
 		layout:      layout,
 	}
+	fmt.Println(tableScan.fileName, layout)
 
 	if transaction.Size(tableScan.fileName) == 0 {
 		tableScan.moveToNewBlock()
@@ -162,5 +165,5 @@ func (tableScan *TableScan) moveToNewBlock() {
 }
 
 func (tableScan *TableScan) atLastBlock() bool {
-	return tableScan.recordPage.Block().Number == tableScan.transaction.Size(tableScan.fileName) -1
+	return tableScan.recordPage.Block().Number == tableScan.transaction.Size(tableScan.fileName)-1
 }

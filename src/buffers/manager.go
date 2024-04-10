@@ -2,8 +2,6 @@ package buffers
 
 import (
 	"errors"
-	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -18,7 +16,6 @@ type Manager struct {
 	bufferPool         []*Buffer // buffer = memory 上に保持している
 	numAvailableBuffer int
 	mu                 sync.Mutex     // 排他処理を行うためのもの
-	wg                 sync.WaitGroup // pin の処理を制御するため
 }
 
 func (manager *Manager) Available() int {
@@ -33,7 +30,7 @@ func (manager *Manager) FlushAll(txnum int) {
 	defer manager.mu.Unlock()
 
 	for _, buffer := range manager.bufferPool {
-		fmt.Printf("buffer manager FlushAll(txnum int): transaction id %d: value ="+strconv.Itoa(buffer.Contents().GetInt(80))+"\n", txnum)
+		// fmt.Printf("buffer manager FlushAll(txnum int): transaction id %d: value ="+strconv.Itoa(buffer.Contents().GetInt(80))+"\n", txnum)
 		// 現在修正したトランザクション id と一致する場合に flush で書き込む
 		if buffer.ModifyingTx() == txnum {
 

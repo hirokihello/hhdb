@@ -54,7 +54,9 @@ func (manager *Manager) GetFile(fileName string) *os.File {
 // ブロックをメモリ上の Page オブジェクトに読み込ませる。該当するブロックが存在しない場合、空のブロックを作成する
 func (manager *Manager) Read(blk Block, page Page) {
 	manager.mu.Lock()
+	defer manager.mu.Unlock()
 	file := manager.GetFile(blk.FileName)
+	file.Sync()
 	info, _ := file.Stat()
 	if int(info.Size()) < manager.BlockSize*(blk.Number+1) {
 		file.Truncate(int64((blk.Number + 1) * manager.BlockSize))
@@ -73,8 +75,6 @@ func (manager *Manager) Read(blk Block, page Page) {
 		fmt.Println(err)
 		fmt.Println("file.Read(page.Contents());was occured, error occured: ")
 	}
-	file.Sync()
-	manager.mu.Unlock()
 }
 
 // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む
@@ -117,7 +117,7 @@ func (manager *Manager) Append(fileName string) *Block {
 	// lengthが現時点の最終ブロック+1 のblockNumberであるので、新規作成で作るのはそのファイルのlengthを直接入れれば良い
 	block := Block{FileName: fileName, Number: blockNumber}
 
-	// 新しくブロックを追加するため、blockNumber + 1 となるように、ファイルを拡張しておく」
+	// 新しくブロックを追加するため、blockNumber + 1 となるように、ファイルを拡張する。ここが append 処理
 	file.Truncate(int64((blockNumber + 1) * manager.BlockSize))
 
 	file.Sync()

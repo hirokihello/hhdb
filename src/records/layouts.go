@@ -11,6 +11,7 @@ type Layout struct {
 	slotSize int
 }
 
+// schema の情報から、それぞれのフィールドのオフセット値と全体の slotsize をいい感じに算出、 layout オブジェクトを作って返す
 func CreateLayout(schema *Schema) *Layout {
 	layout := Layout{
 		schema:  schema,
@@ -25,7 +26,7 @@ func CreateLayout(schema *Schema) *Layout {
 	return &layout
 }
 
-// そのフィールドの中身がどれくらいの領域を必要とするか
+// そのフィールドの中身がどれくらいの領域を必要とするか。int なら 4 bytes. varchar なら文字列の長さ + 4 bytes
 func (layout *Layout) lengthInBytes(fieldName string) int {
 	fieldType := layout.schema.Type(fieldName)
 	if fieldType == INTERGER {

@@ -34,7 +34,7 @@ func (schema *Schema) Add(fieldName string, s Schema) {
 	schema.AddField(fieldName, s.Type(fieldName), s.Length(fieldName))
 }
 
-func (schema *Schema) addAll(s Schema) {
+func (schema *Schema) AddAll(s Schema) {
 	for fieldName := range s.Fields() {
 		schema.Add(fieldName, s)
 	}
@@ -49,14 +49,17 @@ func (schema *Schema) hasField(fieldName string) bool {
 	return schema.fields[fieldName] != 0
 }
 
+// そのフィールドの種類を返す
 func (schema *Schema) Type(fieldName string) int {
 	return schema.info[fieldName].fieldType
 }
 
+// そのフィールドの長さを返す int -> 4, varchar なら設定された値
 func (schema *Schema) Length(fieldName string) int {
 	return schema.info[fieldName].length
 }
 
+// schema を初期化して返す。特に何もしない。
 func CreateSchema() *Schema {
 	return &Schema{
 		fields: make(map[string]int),
