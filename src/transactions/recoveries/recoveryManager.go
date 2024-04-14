@@ -1,8 +1,6 @@
 package recoveries
 
 import (
-	"fmt"
-
 	"github.com/hirokihello/hhdb/src/buffers"
 	"github.com/hirokihello/hhdb/src/logs"
 	transactionInterface "github.com/hirokihello/hhdb/src/transactions/interfaces"
@@ -31,7 +29,6 @@ func (manager RecoveryManager) Commit() {
 
 // この manager が呼び出されたトランザクションの rollback を実行したいときに呼び出す
 func (manager RecoveryManager) Rollback() {
-	fmt.Print("\nrecovery manager: rollback will begin!!!!!\n")
 	// buffer pool 上での全ての変更をディスクに書き込む
 	// rollback　を行う
 	manager.doRollback()

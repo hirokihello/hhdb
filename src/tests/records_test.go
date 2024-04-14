@@ -11,7 +11,7 @@ import (
 )
 
 func TestRecordManager(t *testing.T) {
-	database := db.CreateDB("rtest_dir_record_manager_tests", 400, 3)
+	database := db.CreateDB("test_dir_record_manager_tests", 400, 3)
 	tx := database.CreateNewTransaction()
 	schema := records.CreateSchema()
 

@@ -43,12 +43,12 @@ func TestTransaction(t *testing.T) {
 
 	// transaction 2 で無事に書き込みができるかのテスト
 	TX2_SAMPLE_VAR1 := 2
-	TX2_SAMPLE_VAR2 := "transactionTest dayo1!!!!"
+	TX2_SAMPLE_VAR2 := "transactionTest 2 dayo!!!!"
 	tx2.SetInt(blk, 80, TX2_SAMPLE_VAR1, true)
 	tx2.SetString(blk, 40, TX2_SAMPLE_VAR2, true)
 
-	fmt.Print(tx2.GetInt(blk, 80))    //=> 先ほど書き込んだ 1 が返ってくるはず
-	fmt.Print(tx2.GetString(blk, 40)) // => 先ほど書き込んだ "transactionTest dayo" が返ってくるはず
+	fmt.Println("tx2.GetInt(blk, 80):", tx2.GetInt(blk, 80))       //=> 先ほど書き込んだ 1 が返ってくるはず
+	fmt.Println("tx2.GetString(blk, 40):", tx2.GetString(blk, 40)) // => 先ほど書き込んだ "transactionTest dayo" が返ってくるはず
 
 	tx2.Commit()
 
@@ -57,24 +57,28 @@ func TestTransaction(t *testing.T) {
 	tx3.Pin(blk)
 
 	TX3_SAMPLE_VAR1 := 3333
-	// TX3_SAMPLE_VAR2 := "transactionTest 3 dayo!!!!"
+	TX3_SAMPLE_VAR2 := "transactionTest 3 dayo!!!!"
 	tx3.SetInt(blk, 80, TX3_SAMPLE_VAR1, true)
-	// tx3.SetString(blk, 40, TX3_SAMPLE_VAR2, true)
-	fmt.Print(tx3.GetInt(blk, 80))
-	// fmt.Print(tx3.GetString(blk, 40))
+	tx3.SetString(blk, 40, TX3_SAMPLE_VAR2, true)
+	fmt.Println("tx3.GetInt(blk, 80):", tx3.GetInt(blk, 80))
+	fmt.Println("tx3.GetString(blk, 40):", tx3.GetString(blk, 40))
 	tx3.Rollback()
 
 	// 4 つ目の transaction でも rollback がうまくいっていることを確認する
 	tx4 := transactions.CreateTransaction(testFileManager, testLogManager, testBufferManager)
 	tx4.Pin(blk)
 
+	fmt.Println()
+	fmt.Println("tx4.GetInt(blk, 80):", tx4.GetInt(blk, 80))
+	fmt.Println("tx4.GetString(blk, 40):", tx4.GetString(blk, 40))
+
 	// pos 80 は transaction 2 で設定した値と一致しているはず
 	if TX2_SAMPLE_VAR1 != tx4.GetInt(blk, 80) {
-		t.Errorf("[ " + strconv.Itoa(tx4.GetInt(blk, 80)) + "] is not correct. expected: " + strconv.Itoa(TX2_SAMPLE_VAR1))
+		t.Errorf("[" + strconv.Itoa(tx4.GetInt(blk, 80)) + "] is not correct. expected: " + strconv.Itoa(TX2_SAMPLE_VAR1))
 	}
 	// pos 40 は transaction 2 で設定した値と一致しているはず
 	if TX2_SAMPLE_VAR2 != tx4.GetString(blk, 40) {
-		t.Errorf("[ " + tx4.GetString(blk, 40) + "] is not correct. expected: " + TX2_SAMPLE_VAR2)
+		t.Errorf("[" + tx4.GetString(blk, 40) + "] is not correct. expected: " + TX2_SAMPLE_VAR2)
 	}
 	tx4.Rollback()
 }
