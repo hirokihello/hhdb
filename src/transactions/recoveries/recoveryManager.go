@@ -82,12 +82,12 @@ func (manager RecoveryManager) doRollback() {
 		rec := CreateLogRecord(bytes)
 
 		if rec != nil {
-			fmt.Print("iterator has next\n")
-			fmt.Printf("rec: %T \n", rec)
-			fmt.Printf("Op: %d \n", rec.Op())
-			fmt.Printf("TxNumber: %d \n", rec.TxNumber())
-			fmt.Printf("manager.TxNum: %d \n", manager.txNum)
-			fmt.Print("iterator \n")
+			// fmt.Print("iterator has next\n")
+			// fmt.Printf("rec: %T \n", rec)
+			// fmt.Printf("Op: %d \n", rec.Op())
+			// fmt.Printf("TxNumber: %d \n", rec.TxNumber())
+			// fmt.Printf("manager.TxNum: %d \n", manager.txNum)
+			// fmt.Print("iterator \n")
 			//　読み込んだレコードが、このリカバリーマネージャーを作っているトランザクションと一致している場合、undo して切り戻す
 			if rec.TxNumber() == manager.txNum {
 				// このトランザクションの start record まで遡ったら、それ以上戻す必要のある record はないはずなので処理を収量」

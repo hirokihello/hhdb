@@ -9,7 +9,7 @@ import (
 const EMPTY = 0
 const USED = 1
 
-//slot 番号(そのブロックの中の何番目のレコードか)を使用して操作する。slot 番号は 0 indexed.
+// slot 番号(そのブロックの中の何番目のレコードか)を使用して操作する。slot 番号は 0 indexed.
 type RecordPage struct {
 	transaction *transactions.Transaction
 	blk         *files.Block
@@ -72,7 +72,7 @@ func (rec *RecordPage) Format() {
 		for field := range schema.fields {
 			fieldPos := rec.offset(slot) + rec.layout.offsets[field]
 
-			if schema.Type(field) == INTERGER {
+			if schema.Type(field) == INTEGER {
 				rec.transaction.SetInt(*rec.blk, fieldPos, 0, false)
 			} else {
 				rec.transaction.SetString(*rec.blk, fieldPos, "", false)

@@ -29,7 +29,7 @@ func CreateLayout(schema *Schema) *Layout {
 // そのフィールドの中身がどれくらいの領域を必要とするか。int なら 4 bytes. varchar なら文字列の長さ + 4 bytes
 func (layout *Layout) lengthInBytes(fieldName string) int {
 	fieldType := layout.schema.Type(fieldName)
-	if fieldType == INTERGER {
+	if fieldType == INTEGER {
 		// int の場合は 4 byte
 		return consts.INTEGER_BYTES
 	} else {

@@ -4,18 +4,9 @@ import (
 	"encoding/binary"
 )
 
-// ファイルの内容=ブロックをメモリ上で扱うためのオブジェクト。ファイルを memory に読み込ませたオブジェクト
-type PageI interface {
-	GetString(offset int) string      // page から文字列を読み込む
-	GetInt(offset int) int            // page から数値を読み込む
-	SetString(offset int, str string) // page に文字列を保存する
-	SetInt(offset int, num uint32)    // page に数値を保存する
-	Contents() []byte                 // page の内容を返す
-}
 
 // ファイルの内容=ブロックをメモリ上で扱うためのオブジェクト。ファイルを memory に読み込ませたオブジェクト
 type Page struct {
-	PageI
 	ByteBuffer []byte
 }
 
@@ -44,7 +35,7 @@ func (a Page) GetInt(offset int) int {
 
 // page に引数で渡された num を書き込む
 // 引数の uint32 はこの DB の制約によるもの。
-func (a Page) SetInt(offset int, num uint32) {
+func (a *Page) SetInt(offset int, num uint32) {
 	// int max number
 	if num > 2147483647 {
 		num = 2147483647
@@ -62,7 +53,7 @@ func (a Page) SetInt(offset int, num uint32) {
 }
 
 // page に引数で渡された string を書き込む
-func (a Page) SetString(offset int, str string) {
+func (a *Page) SetString(offset int, str string) {
 	bs := []byte(str)
 	a.SetBytes(bs, offset)
 }

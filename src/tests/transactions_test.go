@@ -11,7 +11,7 @@ import (
 )
 
 func TestTransaction(t *testing.T) {
-	testDb := db.CreateDB("test_dir_2", 400, 3)
+	testDb := db.CreateDB("test_dir_transactions", 400, 3)
 	testLogManager := testDb.LogManager
 	testFileManager := testDb.FileManager
 	testBufferManager := testDb.BufferManager
@@ -19,7 +19,7 @@ func TestTransaction(t *testing.T) {
 	tx1 := transactions.CreateTransaction(testFileManager, testLogManager, testBufferManager)
 	blk := files.Block{
 		FileName: "transactionTestFile",
-		Number:   1,
+		Number:   0,
 	}
 	tx1.Pin(blk)
 
@@ -72,9 +72,9 @@ func TestTransaction(t *testing.T) {
 	if TX2_SAMPLE_VAR1 != tx4.GetInt(blk, 80) {
 		t.Errorf("[ " + strconv.Itoa(tx4.GetInt(blk, 80)) + "] is not correct. expected: " + strconv.Itoa(TX2_SAMPLE_VAR1))
 	}
-	// // pos 40 は transaction 2 で設定した値と一致しているはず
-	// if TX2_SAMPLE_VAR2 != tx4.GetString(blk, 40) {
-	// 	t.Errorf("[ " + tx4.GetString(blk, 40) + "] is not correct. expected: " + TX2_SAMPLE_VAR2)
-	// }
+	// pos 40 は transaction 2 で設定した値と一致しているはず
+	if TX2_SAMPLE_VAR2 != tx4.GetString(blk, 40) {
+		t.Errorf("[ " + tx4.GetString(blk, 40) + "] is not correct. expected: " + TX2_SAMPLE_VAR2)
+	}
 	tx4.Rollback()
 }

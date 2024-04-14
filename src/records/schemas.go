@@ -10,7 +10,7 @@ type Schema struct {
 	info   map[string]FieldInfo
 }
 
-const INTERGER = 4
+const INTEGER = 4
 const VARCHAR = 12
 
 // schema に field を追加する
@@ -22,7 +22,7 @@ func (schema *Schema) AddField(fieldName string, fieldType int, length int) {
 
 // schema に int の field を追加する
 func (schema *Schema) AddIntField(fieldName string) {
-	schema.AddField(fieldName, INTERGER, 0)
+	schema.AddField(fieldName, INTEGER, 0)
 }
 
 // schema に string の field を追加する[]

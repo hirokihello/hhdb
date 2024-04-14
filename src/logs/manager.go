@@ -37,7 +37,7 @@ func (manager *Manager) Flush(lsn int) {
 
 // iterator
 func (manager *Manager) Iterator() *Iterator {
-	manager.Flush(manager.lastSavedLSN)
+	// manager.Flush(manager.lastSavedLSN)
 	return createLogIterator(manager.fileManager, manager.currentBlock)
 }
 
@@ -104,7 +104,7 @@ func CreateManager(fileManager *files.Manager, logFile string) *Manager {
 
 	var block files.Block
 	// 初期状態の場合、初期化する。デフォルトでファイルが作られるときにブロックが作られるのでそのように挙動を修正する
-	if logFileBlockSize == 1 {
+	if logFileBlockSize == 0 {
 		block = files.Block{FileName: logFile, Number: 0}
 		logPage.SetInt(0, uint32(fileManager.BlockSize))
 		fileManager.Write(block, logPage)

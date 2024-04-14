@@ -8,6 +8,7 @@ import (
 	"github.com/hirokihello/hhdb/src/transactions"
 )
 
+// テーブルの値を読み取っていい感じに扱えるようにした
 type TableScan struct {
 	transaction *transactions.Transaction
 	layout      *Layout
@@ -22,14 +23,14 @@ func CreateTableScan(transaction *transactions.Transaction, tableName string, la
 		fileName:    tableName + ".tbl",
 		layout:      layout,
 	}
-	fmt.Println(tableScan.fileName, layout)
 
+	//初期状態で 1 つのブロックを作成するように変更されてしまっているので、その仕様に合わせた変更....
 	if transaction.Size(tableScan.fileName) == 0 {
 		tableScan.moveToNewBlock()
 	} else {
 		tableScan.moveToBlock(0)
 	}
-
+	fmt.Println("current slot of table scan",tableScan.currentSlot)
 	return &tableScan
 }
 
@@ -68,12 +69,14 @@ func (tableScan *TableScan) GetInt(fieldName string) int {
 	return tableScan.recordPage.GetInt(tableScan.currentSlot, fieldName)
 }
 
+// 現在見ているスロットの中身を返却する
 func (tableScan *TableScan) GetString(fieldName string) string {
 	return tableScan.recordPage.GetString(tableScan.currentSlot, fieldName)
 }
 
+// 現在見ているスロットの中身を返却する
 func (tableScan *TableScan) GetValue(fieldName string) *queries.Constants {
-	if tableScan.layout.Schema().Type(fieldName) == INTERGER {
+	if tableScan.layout.Schema().Type(fieldName) == INTEGER {
 		return queries.CreateConstantByInt(tableScan.GetInt(fieldName))
 	} else {
 		return queries.CreateConstantByString(tableScan.GetString(fieldName))
@@ -95,14 +98,14 @@ func (tableScan *TableScan) SetString(fieldName string, value string) {
 
 // fieldName と queries.Constants を受け取ってよしなに更新する
 func (tableScan *TableScan) SetVal(fieldName string, value queries.Constants) {
-	if tableScan.layout.Schema().Type(fieldName) == INTERGER {
+	if tableScan.layout.Schema().Type(fieldName) == INTEGER {
 		tableScan.SetInt(fieldName, value.AsInt())
 	} else {
 		tableScan.SetString(fieldName, value.AsString())
 	}
 }
 
-// 現在の slot を USED に変更する
+// 現在の slot の次に空いている slot を USED に変更する。そしてそこに current slot を変更する
 func (tableScan *TableScan) Insert() {
 	// ブロック内に空きがあれば更新処理
 	tableScan.currentSlot = tableScan.recordPage.InsertAfter(tableScan.currentSlot)
@@ -140,7 +143,7 @@ func (tableScan *TableScan) MoveToRid(rid Rid) {
 }
 
 func (tableScan *TableScan) GetRid() *Rid {
-	return createRid(tableScan.recordPage.blk.Number, tableScan.currentSlot)
+	return createRid(tableScan.currentSlot, tableScan.recordPage.blk.Number)
 }
 
 func (tableScan *TableScan) moveToBlock(blockNumber int) {
@@ -157,6 +160,7 @@ func (tableScan *TableScan) moveToNewBlock() {
 
 	// 新しく transaction により block を作成する
 	blk := tableScan.transaction.Append(tableScan.fileName)
+
 	// 見ている page を移動する
 	tableScan.recordPage = CreateRecordPage(tableScan.transaction, blk, tableScan.layout)
 	tableScan.recordPage.Format()

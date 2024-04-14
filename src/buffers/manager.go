@@ -15,7 +15,7 @@ var MAX_WAIT_TIME int = 5
 type Manager struct {
 	bufferPool         []*Buffer // buffer = memory 上に保持している
 	numAvailableBuffer int
-	mu                 sync.Mutex     // 排他処理を行うためのもの
+	mu                 sync.Mutex // 排他処理を行うためのもの
 }
 
 func (manager *Manager) Available() int {

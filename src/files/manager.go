@@ -17,10 +17,9 @@ type Manager struct {
 
 // データベース・エンジンのうち、オペレーティング・システムとやりとりするようなオブジェクト
 type ManagerI interface {
-	DbDirectory() string            // create されるときに引数で渡される
-	BlockSize() int                 // 1 block の byte 数
-	OpenFiles() map[string]*os.File // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
-
+	DbDirectory() string                 // create されるときに引数で渡される
+	BlockSize() int                      // 1 block の byte 数
+	OpenFiles() map[string]*os.File      // manager が現在開いている(メモリ上に保持している)ファイル(ブロック)の一覧。ページオブジェクトの一覧。
 	GetFile(fileName string) *os.File    // ファイルを読み込み、プログラム上で使用できるようにする
 	Read(blk Block, page Page)           // GetFile で読み込んだ物理的なファイルをメモリ上の Page オブジェクトに読み込ませる
 	Write(blk Block, page Page)          // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む。該当のファイルがない場合は作成される
@@ -35,13 +34,7 @@ func (manager *Manager) GetFile(fileName string) *os.File {
 	// blkやpageがどのように作られるのかはまた別の話
 	f, err := manager.OpenFiles[fileName]
 	if !err {
-		file, err2 := os.OpenFile(manager.DbDirectory+"/"+fileName, os.O_SYNC|os.O_RDWR, 0755)
-		if err2 != nil {
-			newFile, _ := os.Create(manager.DbDirectory + "/" + fileName)
-			file = newFile
-			file.Write(make([]byte, manager.BlockSize))
-			file.Sync()
-		}
+		file, _ := os.OpenFile(manager.DbDirectory+"/"+fileName, os.O_SYNC|os.O_RDWR|os.O_CREATE, 0755)
 		file.Seek(0, 0)
 		file.Sync()
 		manager.OpenFiles[fileName] = file
@@ -57,24 +50,15 @@ func (manager *Manager) Read(blk Block, page Page) {
 	defer manager.mu.Unlock()
 	file := manager.GetFile(blk.FileName)
 	file.Sync()
-	info, _ := file.Stat()
-	if int(info.Size()) < manager.BlockSize*(blk.Number+1) {
-		file.Truncate(int64((blk.Number + 1) * manager.BlockSize))
-	}
 
-	n, err := file.Seek(int64(blk.Number*manager.BlockSize), 0)
+	n, err := file.Seek(int64((blk.Number)*manager.BlockSize), 0)
 	if err != nil {
 		fmt.Println(n)
 		fmt.Println("when file.Seek(int64(blk.Number * manager.BlockSize), 0) was occured, error generated: ")
 	}
 
 	// page size 分のものを読み込む
-	read_n, err := file.Read(page.Contents())
-	if err != nil {
-		fmt.Println(read_n)
-		fmt.Println(err)
-		fmt.Println("file.Read(page.Contents());was occured, error occured: ")
-	}
+	file.Read(page.Contents())
 }
 
 // メモリ上の Page オブジェクトの内容を、対応する物理的なファイルに書き込む
@@ -85,13 +69,13 @@ func (manager *Manager) Write(blk Block, page Page) {
 	file := manager.GetFile(blk.FileName)
 	info, _ := file.Stat()
 	//ファイルが小さかったら拡張
-	if info.Size() < int64((blk.Number+1)*manager.BlockSize) {
+	if info == nil || info.Size() < int64((blk.Number+1)*manager.BlockSize) {
 		file.Truncate(int64((blk.Number + 1) * manager.BlockSize))
 	}
 	// 第二引数0はファイルの先頭からのoffsetを示す
 	file.Seek(int64(blk.Number*manager.BlockSize), 0)
 
-	// ページにロードされている内容を読み込む
+	// ページにロードされている内容をディスクに書き込み
 	file.Write(page.Contents())
 	file.Sync()
 	manager.mu.Unlock()

@@ -35,10 +35,11 @@ func TestTableScan(t *testing.T) {
 		tableScan.SetInt("A", n)
 		tableScan.SetString("B", "rec"+strconv.Itoa(n))
 
-		fmt.Printf("inserting into slot %d {%d,rec %d} \n", tableScan.GetRid(), n, n)
+		fmt.Printf("inserting into slot %v {%d,rec %d} \n", tableScan.GetRid(), n, n)
 	}
 
 	fmt.Println("Deleting records with A-values < 25")
+
 	count := 0
 	tableScan.BeforeFirst()
 	for tableScan.Next() {
@@ -46,7 +47,7 @@ func TestTableScan(t *testing.T) {
 		b := tableScan.GetString("B")
 		if a < 25 {
 			count++
-			fmt.Printf("inserting into slot %d {%d, %s} \n", tableScan.GetRid(), a, b)
+			fmt.Printf("deleted slot %d {%d, %s} \n", tableScan.GetRid(), a, b)
 			tableScan.Delete()
 		}
 	}
@@ -58,7 +59,7 @@ func TestTableScan(t *testing.T) {
 	for tableScan.Next() {
 		a := tableScan.GetInt("A")
 		b := tableScan.GetString("B")
-		fmt.Printf("inserting into slot %d {%d, %s} \n", tableScan.GetRid(), a, b)
+		fmt.Printf("getting slot %d {%d, %s} \n", tableScan.GetRid(), a, b)
 	}
 
 	tableScan.Close()

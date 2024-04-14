@@ -91,6 +91,7 @@ func (transaction *Transaction) GetString(blk files.Block, offset int) string {
 
 func (transaction *Transaction) SetInt(blk files.Block, offset int, val int, oktolog bool) {
 	transaction.concurrencyManager.XLock(blk)
+
 	buffer := transaction.myBuffers.getBuffer(blk)
 	lsn := -1
 	if oktolog {

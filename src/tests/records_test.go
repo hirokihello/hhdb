@@ -41,7 +41,7 @@ func TestRecordManager(t *testing.T) {
 		slot = rp.InsertAfter(slot)
 	}
 
-	fmt.Print("deleted these records with A-values<25 \n")
+	fmt.Print("delete these records with A-values<25 \n")
 
 	count := 0
 	slot = rp.NextAfter(-1)

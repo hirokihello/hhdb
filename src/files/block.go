@@ -13,12 +13,6 @@ type Block struct {
 	Number int; // そのブロックの論理的な識別数値。ファイル内の何番目のブロックなのか。
 }
 
-// Block とは物理ファイルをいくつかのチャンクに分割した単位
-type BlockI interface {
-	IsEqual() bool; // block が等しいか検証する
-	ToString() string; // block のファイル名とブロック番号を合わせたものを返す
-	HashCode() string; // ブロックに固有のハッシュ値を返却する
-}
 
 func(a Block) IsEqual (b Block) bool {
 	return a.FileName == b.FileName && a.Number == b.Number;
