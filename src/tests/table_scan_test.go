@@ -11,7 +11,7 @@ import (
 )
 
 func TestTableScan(t *testing.T) {
-	database := db.CreateDB("table_scan_tests", 400, 3)
+	database := db.CreateDB("test_dir_scan_tests", 400, 3)
 	tx := database.CreateNewTransaction()
 	schema := records.CreateSchema()
 
