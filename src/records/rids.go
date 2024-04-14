@@ -7,7 +7,7 @@ type Rid struct {
 	blockNumber int
 }
 
-func createRid(slot int, blockNumber int) *Rid {
+func createRid(blockNumber int, slot int) *Rid {
 	return &Rid{slot: slot, blockNumber: blockNumber}
 }
 

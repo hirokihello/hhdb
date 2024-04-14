@@ -143,7 +143,7 @@ func (tableScan *TableScan) MoveToRid(rid Rid) {
 }
 
 func (tableScan *TableScan) GetRid() *Rid {
-	return createRid(tableScan.currentSlot, tableScan.recordPage.blk.Number)
+	return createRid(tableScan.recordPage.blk.Number, tableScan.currentSlot)
 }
 
 func (tableScan *TableScan) moveToBlock(blockNumber int) {
