@@ -50,6 +50,7 @@ func (transaction *Transaction) Commit() {
 	// 保持していた buffer を全て解放する
 	transaction.concurrencyManager.Release()
 	transaction.myBuffers.unpinAll()
+
 	fmt.Printf("transaction id %d was committed\n", transaction.txNum)
 }
 
@@ -76,14 +77,14 @@ func (transaction *Transaction) UnPin(blk files.Block) {
 
 // block と offset を受け取ることで、そこからデータを取得
 func (transaction *Transaction) GetInt(blk files.Block, offset int) int {
-	transaction.concurrencyManager.SLock(blk)
+	transaction.concurrencyManager.XLock(blk)
 	buffer := transaction.myBuffers.getBuffer(blk)
 	return buffer.Contents().GetInt(offset)
 }
 
 // block と offset を受け取ることで、そこからデータを取得
 func (transaction *Transaction) GetString(blk files.Block, offset int) string {
-	transaction.concurrencyManager.SLock(blk)
+	transaction.concurrencyManager.XLock(blk)
 	buffer := transaction.myBuffers.getBuffer(blk)
 
 	return buffer.Contents().GetString(offset)
@@ -109,6 +110,7 @@ func (transaction *Transaction) SetString(blk files.Block, offset int, val strin
 	buffer := transaction.myBuffers.getBuffer(blk)
 	lsn := -1
 	if oktolog {
+		// ここでエラーが生じている
 		lsn = transaction.recoveryManager.SetString(buffer, offset, val)
 	}
 	p := buffer.Contents()
@@ -121,7 +123,7 @@ func (transaction *Transaction) SetString(blk files.Block, offset int, val strin
 func (transaction *Transaction) Size(fileName string) int {
 	// dummy のブロックを作る。ファイル名の長さを知りたいだけなので、これで十分なんだけど。なんで作るんだろ？？
 	dummyBlock := files.Block{FileName: fileName, Number: -1}
-	transaction.concurrencyManager.SLock(dummyBlock)
+	transaction.concurrencyManager.XLock(dummyBlock)
 
 	return transaction.fileManager.FileBlockLength(fileName)
 }

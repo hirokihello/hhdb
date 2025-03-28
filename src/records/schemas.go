@@ -1,5 +1,7 @@
 package records
 
+import "github.com/hirokihello/hhdb/src/consts"
+
 type FieldInfo struct {
 	fieldType int // 本来は type だけど go の予約後なので命名変更
 	length    int
@@ -10,9 +12,6 @@ type Schema struct {
 	info   map[string]FieldInfo
 }
 
-const INTEGER = 4
-const VARCHAR = 12
-
 // schema に field を追加する
 // field type は 4 か 12 のマジックナンバーを使用する(元の実装が java のため、java で使用されているものに準拠している)
 func (schema *Schema) AddField(fieldName string, fieldType int, length int) {
@@ -22,12 +21,12 @@ func (schema *Schema) AddField(fieldName string, fieldType int, length int) {
 
 // schema に int の field を追加する
 func (schema *Schema) AddIntField(fieldName string) {
-	schema.AddField(fieldName, INTEGER, 0)
+	schema.AddField(fieldName, consts.INTEGER, 0)
 }
 
 // schema に string の field を追加する[]
 func (schema *Schema) AddStringField(fieldName string, length int) {
-	schema.AddField(fieldName, VARCHAR, length)
+	schema.AddField(fieldName, consts.VARCHAR, length)
 }
 
 func (schema *Schema) Add(fieldName string, s Schema) {

@@ -1,6 +1,7 @@
 package records
 
 import (
+	"github.com/hirokihello/hhdb/src/consts"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/transactions"
 )
@@ -72,7 +73,7 @@ func (rec *RecordPage) Format() {
 		for field := range schema.fields {
 			fieldPos := rec.offset(slot) + rec.layout.offsets[field]
 
-			if schema.Type(field) == INTEGER {
+			if schema.Type(field) == consts.INTEGER {
 				rec.transaction.SetInt(*rec.blk, fieldPos, 0, false)
 			} else {
 				rec.transaction.SetString(*rec.blk, fieldPos, "", false)
@@ -115,6 +116,7 @@ func (rec *RecordPage) setFlag(slot int, flag int) {
 	rec.transaction.SetInt(*rec.blk, rec.offset(slot), flag, true)
 }
 
+// slot(何スロット目) * rec.layout.slotSize(1 スロットあたりのサイズ)
 func (rec *RecordPage) offset(slot int) int {
 	return slot * rec.layout.slotSize
 }

@@ -1,8 +1,7 @@
 package records
 
 import (
-	"fmt"
-
+	"github.com/hirokihello/hhdb/src/consts"
 	"github.com/hirokihello/hhdb/src/files"
 	"github.com/hirokihello/hhdb/src/queries"
 	"github.com/hirokihello/hhdb/src/transactions"
@@ -30,7 +29,7 @@ func CreateTableScan(transaction *transactions.Transaction, tableName string, la
 	} else {
 		tableScan.moveToBlock(0)
 	}
-	fmt.Println("current slot of table scan",tableScan.currentSlot)
+
 	return &tableScan
 }
 
@@ -47,7 +46,6 @@ func (tableScan *TableScan) BeforeFirst() {
 
 func (tableScan *TableScan) Next() bool {
 	tableScan.currentSlot = tableScan.recordPage.NextAfter(tableScan.currentSlot)
-
 	// 空いているスロットが現在のブロックにない場合
 	for tableScan.currentSlot < 0 {
 		// 今いるのが最終ブロックの場合 (最後のブロックの最後のレコードのスロットを現在見ている場合)
@@ -76,7 +74,7 @@ func (tableScan *TableScan) GetString(fieldName string) string {
 
 // 現在見ているスロットの中身を返却する
 func (tableScan *TableScan) GetValue(fieldName string) *queries.Constants {
-	if tableScan.layout.Schema().Type(fieldName) == INTEGER {
+	if tableScan.layout.Schema().Type(fieldName) == consts.INTEGER {
 		return queries.CreateConstantByInt(tableScan.GetInt(fieldName))
 	} else {
 		return queries.CreateConstantByString(tableScan.GetString(fieldName))
@@ -98,7 +96,7 @@ func (tableScan *TableScan) SetString(fieldName string, value string) {
 
 // fieldName と queries.Constants を受け取ってよしなに更新する
 func (tableScan *TableScan) SetVal(fieldName string, value queries.Constants) {
-	if tableScan.layout.Schema().Type(fieldName) == INTEGER {
+	if tableScan.layout.Schema().Type(fieldName) == consts.INTEGER {
 		tableScan.SetInt(fieldName, value.AsInt())
 	} else {
 		tableScan.SetString(fieldName, value.AsString())
@@ -109,7 +107,6 @@ func (tableScan *TableScan) SetVal(fieldName string, value queries.Constants) {
 func (tableScan *TableScan) Insert() {
 	// ブロック内に空きがあれば更新処理
 	tableScan.currentSlot = tableScan.recordPage.InsertAfter(tableScan.currentSlot)
-
 	// 空いているスロットが現在のブロックになくて更新できなかった場合
 	for tableScan.currentSlot < 0 {
 		// 今いるのが最終ブロックの場合 (最後のブロックの最後のレコードのスロットを現在見ている場合)

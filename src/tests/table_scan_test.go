@@ -11,7 +11,7 @@ import (
 )
 
 func TestTableScan(t *testing.T) {
-	database := db.CreateDB("test_dir_scan_tests", 400, 3)
+	database := db.CreateDB("test_dir_scan_tests", 400, 1)
 	tx := database.CreateNewTransaction()
 	schema := records.CreateSchema()
 
@@ -26,16 +26,33 @@ func TestTableScan(t *testing.T) {
 
 	tableScan := records.CreateTableScan(tx, "T", layout)
 
+	fmt.Println("Here are the remaining records.")
+	tableScan.BeforeFirst()
+
+	for tableScan.Next() {
+		a := tableScan.GetInt("A")
+		b := tableScan.GetString("B")
+		fmt.Printf("getting slot %d {%d, %s} \n", tableScan.GetRid(), a, b)
+	}
+
 	fmt.Println("Filling the table with 50 random records")
 	tableScan.BeforeFirst()
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 1; i++ {
 		tableScan.Insert()
 		n := rand.Intn(50)
 		tableScan.SetInt("A", n)
 		tableScan.SetString("B", "rec"+strconv.Itoa(n))
-
 		fmt.Printf("inserting into slot %v {%d,rec %d} \n", tableScan.GetRid(), n, n)
+	}
+
+	fmt.Println("Here are the remaining records.")
+	tableScan.BeforeFirst()
+
+	for tableScan.Next() {
+		a := tableScan.GetInt("A")
+		b := tableScan.GetString("B")
+		fmt.Printf("getting slot %d {%d, %s} \n", tableScan.GetRid(), a, b)
 	}
 
 	fmt.Println("Deleting records with A-values < 25")
@@ -43,6 +60,7 @@ func TestTableScan(t *testing.T) {
 	count := 0
 	tableScan.BeforeFirst()
 	for tableScan.Next() {
+		// fmt.Println("tableScan.Next()", tableScan.GetRid().Slot())
 		a := tableScan.GetInt("A")
 		b := tableScan.GetString("B")
 		if a < 25 {
