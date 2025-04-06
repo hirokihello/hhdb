@@ -28,7 +28,7 @@ func TableManagerTest(t *testing.T) {
 
 	fmt.Println("MyTable has slot size", size)
 	fmt.Println("Its fields are:")
-	for fieldName := range schema2.Fields() {
+	for _, fieldName := range schema2.Fields() {
 		var typeOfField string
 		if schema2.Type(fieldName) == consts.INTEGER {
 			typeOfField = "int"

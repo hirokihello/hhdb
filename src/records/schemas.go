@@ -1,6 +1,10 @@
 package records
 
-import "github.com/hirokihello/hhdb/src/consts"
+import (
+	"sort"
+
+	"github.com/hirokihello/hhdb/src/consts"
+)
 
 type FieldInfo struct {
 	fieldType int // 本来は type だけど go の予約後なので命名変更
@@ -34,13 +38,21 @@ func (schema *Schema) Add(fieldName string, s Schema) {
 }
 
 func (schema *Schema) AddAll(s Schema) {
-	for fieldName := range s.Fields() {
+	for _, fieldName := range s.Fields() {
 		schema.Add(fieldName, s)
 	}
 }
 
-func (schema *Schema) Fields() map[string]int {
-	return schema.fields
+func (schema *Schema) Fields() []string {
+	keys := make([]string, len(schema.fields))
+
+	i := 0
+	for key := range schema.fields {
+		keys[i] = key
+		i++
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // 保持している field 名一覧に、引数のフィールドがあるか判定

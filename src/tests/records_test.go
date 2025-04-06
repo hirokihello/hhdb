@@ -19,7 +19,7 @@ func TestRecordManager(t *testing.T) {
 	schema.AddStringField("B", 9)
 	layout := records.CreateLayout(schema)
 
-	for field := range layout.Schema().Fields() {
+	for _, field := range layout.Schema().Fields() {
 		offset := layout.Offset(field)
 		fmt.Print(field + " has offset " + strconv.Itoa(offset) + " \n")
 	}

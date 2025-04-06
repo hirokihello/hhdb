@@ -111,7 +111,7 @@ func (manager *Manager) findExistingBuffer(block *files.Block) *Buffer {
 
 // 空いている buffer が存在すれば、それを返す。存在しなければ nil を返す
 func (manager *Manager) chooseUnPinnedBuffer() *Buffer {
-	// ナイーブな実装。先頭から空いているか見ていく
+	// ナイーブな実装。ランダムに空いているか見ていく
 	for _, buffer := range manager.bufferPool {
 		if !buffer.IsPinned() {
 			return buffer

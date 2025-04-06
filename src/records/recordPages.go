@@ -63,14 +63,14 @@ func (rec *RecordPage) Delete(slot int) {
 	rec.setFlag(slot, EMPTY)
 }
 
-// record として使用できるように、そのブロックの内容絵を初期状態にするメソッド
+// record として使用できるように、そのブロックの内容を初期状態にするメソッド
 func (rec *RecordPage) Format() {
 	slot := 0
 	for rec.isValidSlot(slot) {
 		rec.transaction.SetInt(*rec.blk, rec.offset(slot), EMPTY, false)
 		schema := rec.layout.schema
 
-		for field := range schema.fields {
+		for _, field := range schema.Fields() {
 			fieldPos := rec.offset(slot) + rec.layout.offsets[field]
 
 			if schema.Type(field) == consts.INTEGER {

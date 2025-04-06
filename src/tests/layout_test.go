@@ -14,7 +14,7 @@ func TestLayout(t *testing.T) {
 	schema.AddStringField("B", 9)
 	layout := records.CreateLayout(schema)
 
-	for fieldName := range layout.Schema().Fields() {
+	for _, fieldName := range layout.Schema().Fields() {
 		offset := layout.Offset(fieldName)
 		// 4 / 8 になる。順番的に、最初の 4 byte. 次に int が 4 byte. 最後に string になるので。
 		fmt.Print(fieldName + " has offset: " + strconv.Itoa(offset) + "\n")

@@ -32,14 +32,14 @@ type ManagerI interface {
 func (manager *Manager) GetFile(fileName string) *os.File {
 	// ここで使ってるファイルは基本的にblkやpageの単位のファイルと異なる....!!
 	// blkやpageがどのように作られるのかはまた別の話
-	f, err := manager.OpenFiles[fileName]
-	if !err {
+	// f, err := manager.OpenFiles[fileName]
+	// if !err {
 		file, _ := os.OpenFile(manager.DbDirectory+"/"+fileName, os.O_SYNC|os.O_RDWR|os.O_CREATE, 0755)
 		file.Seek(0, 0)
 		file.Sync()
 		manager.OpenFiles[fileName] = file
-		f = file
-	}
+		f := file
+	// }
 
 	return f
 }
@@ -78,6 +78,8 @@ func (manager *Manager) Write(blk Block, page Page) {
 	// ページにロードされている内容をディスクに書き込み
 	file.Write(page.Contents())
 	file.Sync()
+
+	defer file.Close()
 	manager.mu.Unlock()
 }
 
@@ -106,6 +108,7 @@ func (manager *Manager) Append(fileName string) *Block {
 
 	file.Sync()
 	manager.mu.Unlock()
+	defer file.Close()
 	return &block
 }
 

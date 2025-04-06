@@ -48,7 +48,7 @@ func (t *TableManger) CreateTable(
 
 	fieldCatalog := records.CreateTableScan(transaction, "fieldCatalog", t.fieldCatalogLayout)
 
-	for fieldName := range schema.Fields() {
+	for _, fieldName := range schema.Fields() {
 		fieldCatalog.Insert()
 		fieldCatalog.SetString("tableName", tableName)
 		fieldCatalog.SetString("fieldName", fieldName)

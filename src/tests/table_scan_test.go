@@ -11,7 +11,7 @@ import (
 )
 
 func TestTableScan(t *testing.T) {
-	database := db.CreateDB("test_dir_scan_tests", 400, 1)
+	database := db.CreateDB("test_dir_scan_tests", 400, 3)
 	tx := database.CreateNewTransaction()
 	schema := records.CreateSchema()
 
@@ -19,7 +19,7 @@ func TestTableScan(t *testing.T) {
 	schema.AddStringField("B", 9)
 	layout := records.CreateLayout(schema)
 
-	for field := range layout.Schema().Fields() {
+	for _, field := range layout.Schema().Fields() {
 		offset := layout.Offset(field)
 		fmt.Print(field + " has offset " + strconv.Itoa(offset) + " \n")
 	}
@@ -42,7 +42,7 @@ func TestTableScan(t *testing.T) {
 		tableScan.Insert()
 		n := rand.Intn(50)
 		tableScan.SetInt("A", n)
-		tableScan.SetString("B", "rec"+strconv.Itoa(n))
+		tableScan.SetString("B", "rec "+strconv.Itoa(n))
 		fmt.Printf("inserting into slot %v {%d,rec %d} \n", tableScan.GetRid(), n, n)
 	}
 

@@ -18,7 +18,7 @@ func CreateLayout(schema *Schema) *Layout {
 		offsets: make(map[string]int),
 	}
 	pos := consts.INTEGER_BYTES // space for the empty / inuse flag
-	for fieldName := range schema.Fields() {
+	for _, fieldName := range schema.Fields() {
 		layout.offsets[fieldName] = pos
 		pos += layout.lengthInBytes(fieldName)
 	}
