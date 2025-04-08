@@ -9,7 +9,7 @@ import (
 	"github.com/hirokihello/hhdb/src/records"
 )
 
-func CatalogTest(t *testing.T) {
+func TestCatalog(t *testing.T) {
 	db := db.CreateDB("catalogTest", 400, 8)
 	transaction := db.CreateNewTransaction()
 	tableManager := metadatas.CreateTableManager(true, transaction)

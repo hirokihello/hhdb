@@ -6,6 +6,10 @@ import (
 )
 
 var MAX_NAME = 16
+var TABLE_NAME = "tableName"
+var SLOT_SIZE = "slotSize"
+var TABLE_CATALOG = "tableCatalog"
+var FIELD_CATALOG = "fieldCatalog"
 
 type TableManger struct {
 	tableCatalogLayout *records.Layout
@@ -14,22 +18,27 @@ type TableManger struct {
 
 func CreateTableManager(isNew bool, transaction *transactions.Transaction) *TableManger {
 	tableCatalogSchema := records.CreateSchema()
-	tableCatalogSchema.AddStringField("tableName", MAX_NAME)
-	tableCatalogSchema.AddIntField("slotSize")
+	tableCatalogSchema.AddStringField(TABLE_NAME, MAX_NAME)
+	tableCatalogSchema.AddIntField(SLOT_SIZE)
 	tableCatalogLayout := records.CreateLayout(tableCatalogSchema)
 
 	fieldCatalogSchema := records.CreateSchema()
-	fieldCatalogSchema.AddStringField("tableName", MAX_NAME)
+	fieldCatalogSchema.AddStringField(TABLE_NAME, MAX_NAME)
 	fieldCatalogSchema.AddStringField("fieldName", MAX_NAME)
 	fieldCatalogSchema.AddIntField("type")
 	fieldCatalogSchema.AddIntField("length")
 	fieldCatalogSchema.AddIntField("offset")
 	fieldCatalogLayout := records.CreateLayout(fieldCatalogSchema)
+
 	tableManager := TableManger{
 		tableCatalogLayout: tableCatalogLayout,
 		fieldCatalogLayout: fieldCatalogLayout,
 	}
 
+	if isNew {
+		tableManager.CreateTable(TABLE_CATALOG, tableCatalogSchema, transaction)
+		tableManager.CreateTable(FIELD_CATALOG, fieldCatalogSchema, transaction)
+	}
 	return &tableManager
 }
 
@@ -40,17 +49,17 @@ func (t *TableManger) CreateTable(
 ) {
 	layout := records.CreateLayout(schema)
 
-	tableCatalog := records.CreateTableScan(transaction, "tableCatalog", t.tableCatalogLayout)
+	tableCatalog := records.CreateTableScan(transaction, TABLE_CATALOG, t.tableCatalogLayout)
 	tableCatalog.Insert()
-	tableCatalog.SetString("tableName", tableName)
-	tableCatalog.SetInt("slotSize", layout.SlotSize())
+	tableCatalog.SetString(TABLE_NAME, tableName)
+	tableCatalog.SetInt(SLOT_SIZE, layout.SlotSize())
 	tableCatalog.Close()
 
-	fieldCatalog := records.CreateTableScan(transaction, "fieldCatalog", t.fieldCatalogLayout)
+	fieldCatalog := records.CreateTableScan(transaction, FIELD_CATALOG, t.fieldCatalogLayout)
 
 	for _, fieldName := range schema.Fields() {
 		fieldCatalog.Insert()
-		fieldCatalog.SetString("tableName", tableName)
+		fieldCatalog.SetString(TABLE_NAME, tableName)
 		fieldCatalog.SetString("fieldName", fieldName)
 		fieldCatalog.SetInt("type", schema.Type(fieldName))
 		fieldCatalog.SetInt("length", schema.Length(fieldName))
@@ -64,26 +73,26 @@ func (t *TableManger) GetLayout(
 	transaction *transactions.Transaction,
 ) *records.Layout {
 	size := -1
-	tableCatalog := records.CreateTableScan(transaction, "tableCatalog", t.tableCatalogLayout)
+	tableCatalog := records.CreateTableScan(transaction, TABLE_CATALOG, t.tableCatalogLayout)
 
 	for tableCatalog.Next() {
-		if tableCatalog.GetString("tableName") == tableName {
-			size = tableCatalog.GetInt("slotSize")
+		if tableCatalog.GetString(TABLE_NAME) == tableName {
+			size = tableCatalog.GetInt(SLOT_SIZE)
 			break
 		}
 	}
 	tableCatalog.Close()
 
 	schema := records.CreateSchema()
-	var offsets map[string]int
+	offsets := make(map[string]int)
 	fieldCatalog := records.CreateTableScan(
 		transaction,
-		"fieldCatalog",
+		FIELD_CATALOG,
 		t.fieldCatalogLayout,
 	)
 
 	for fieldCatalog.Next() {
-		if fieldCatalog.GetString("tableName") == tableName {
+		if fieldCatalog.GetString(TABLE_NAME) == tableName {
 			fieldName := fieldCatalog.GetString("fieldName")
 			fieldType := fieldCatalog.GetInt("type")
 			fieldLength := fieldCatalog.GetInt("length")
