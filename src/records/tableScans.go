@@ -81,7 +81,7 @@ func (tableScan *TableScan) GetValue(fieldName string) *queries.Constants {
 	}
 }
 func (tableScan *TableScan) HasField(FieldName string) bool {
-	return tableScan.layout.Schema().hasField(FieldName)
+	return tableScan.layout.Schema().HasField(FieldName)
 }
 
 // 現在のスロットのフィールドの値を更新

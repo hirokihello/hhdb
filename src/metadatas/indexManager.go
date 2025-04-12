@@ -7,14 +7,14 @@ import (
 )
 
 type IndexManager struct {
-	tableManager *TableManger
+	tableManager *TableManager
 	layout       *records.Layout
-	StatManager  *StatManager
+	statManager  *StatManager
 }
 
 func CreateIndexManager(
 	isNew bool,
-	tableManager *TableManger,
+	tableManager *TableManager,
 	statManager *StatManager,
 	transaction *transactions.Transaction,
 ) *IndexManager {
@@ -28,7 +28,7 @@ func CreateIndexManager(
 	indexManager := IndexManager{
 		tableManager: tableManager,
 		layout:       tableManager.GetLayout("indexCatalog", transaction),
-		StatManager:  statManager,
+		statManager:  statManager,
 	}
 	return &indexManager
 }
@@ -59,7 +59,7 @@ func (i *IndexManager) GetIndexInfo(
 			indexName := tableScan.GetString("indexName")
 			fieldName := tableScan.GetString("fieldName")
 			layout := i.tableManager.GetLayout(tableName, transaction)
-			statInfo := i.StatManager.GetStatInfo(tableName, layout, transaction)
+			statInfo := i.statManager.GetStatInfo(tableName, layout, transaction)
 			result[fieldName] = CreateIndexInfo(
 				indexName,
 				fieldName,
@@ -119,20 +119,20 @@ func (i *IndexInfo) Open() {
 	// )
 }
 
-func (i *IndexInfo) blockAccessed() int {
+func (i *IndexInfo) BlockAccessed() int {
 	rpb := i.transaction.BlockSize() / i.layout.SlotSize()
-	numBlocks := i.statInfo.recordsOutput() / rpb
+	numBlocks := i.statInfo.RecordsOutput() / rpb
 	// return hashIndex.searchCost(numBlocks, rpb)
 	return numBlocks
 }
 
-func (i *IndexInfo) recordsOutput() int {
-	return i.statInfo.recordsOutput()
+func (i *IndexInfo) RecordsOutput() int {
+	return i.statInfo.RecordsOutput()
 }
-func (i *IndexInfo) distinctValues(fieldName string) int {
+func (i *IndexInfo) DistinctValues(fieldName string) int {
 	if fieldName == i.fieldName {
 		return 1
 	} else {
-		return i.statInfo.distinctValues(fieldName)
+		return i.statInfo.DistinctValues(fieldName)
 	}
 }

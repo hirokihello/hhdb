@@ -56,7 +56,7 @@ func (schema *Schema) Fields() []string {
 }
 
 // 保持している field 名一覧に、引数のフィールドがあるか判定
-func (schema *Schema) hasField(fieldName string) bool {
+func (schema *Schema) HasField(fieldName string) bool {
 	return schema.fields[fieldName] != 0
 }
 

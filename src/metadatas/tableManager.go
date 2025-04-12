@@ -11,12 +11,12 @@ var SLOT_SIZE = "slotSize"
 var TABLE_CATALOG = "tableCatalog"
 var FIELD_CATALOG = "fieldCatalog"
 
-type TableManger struct {
+type TableManager struct {
 	tableCatalogLayout *records.Layout
 	fieldCatalogLayout *records.Layout
 }
 
-func CreateTableManager(isNew bool, transaction *transactions.Transaction) *TableManger {
+func CreateTableManager(isNew bool, transaction *transactions.Transaction) *TableManager {
 	tableCatalogSchema := records.CreateSchema()
 	tableCatalogSchema.AddStringField(TABLE_NAME, MAX_NAME)
 	tableCatalogSchema.AddIntField(SLOT_SIZE)
@@ -30,7 +30,7 @@ func CreateTableManager(isNew bool, transaction *transactions.Transaction) *Tabl
 	fieldCatalogSchema.AddIntField("offset")
 	fieldCatalogLayout := records.CreateLayout(fieldCatalogSchema)
 
-	tableManager := TableManger{
+	tableManager := TableManager{
 		tableCatalogLayout: tableCatalogLayout,
 		fieldCatalogLayout: fieldCatalogLayout,
 	}
@@ -42,7 +42,7 @@ func CreateTableManager(isNew bool, transaction *transactions.Transaction) *Tabl
 	return &tableManager
 }
 
-func (t *TableManger) CreateTable(
+func (t *TableManager) CreateTable(
 	tableName string,
 	schema *records.Schema,
 	transaction *transactions.Transaction,
@@ -68,7 +68,7 @@ func (t *TableManger) CreateTable(
 	fieldCatalog.Close()
 }
 
-func (t *TableManger) GetLayout(
+func (t *TableManager) GetLayout(
 	tableName string,
 	transaction *transactions.Transaction,
 ) *records.Layout {

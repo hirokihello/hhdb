@@ -6,7 +6,7 @@ import (
 )
 
 type ViewManager struct {
-	TableManger *TableManger
+	TableManager *TableManager
 }
 
 const MAX_VIEW_DEF = 100
@@ -16,7 +16,7 @@ func (v *ViewManager) CreateView(
 	viewDef string,
 	transaction *transactions.Transaction,
 ) {
-	layout := v.TableManger.GetLayout("viewCatalog", transaction)
+	layout := v.TableManager.GetLayout("viewCatalog", transaction)
 	tableScan := records.CreateTableScan(transaction, "viewCatalog", layout)
 	// この行いらないかも？
 	tableScan.Insert()
@@ -30,9 +30,8 @@ func (v *ViewManager) GetViewDef(
 	transaction *transactions.Transaction,
 ) string {
 	var result string
-	layout := v.TableManger.GetLayout("viewCatalog", transaction)
+	layout := v.TableManager.GetLayout("viewCatalog", transaction)
 	tableScan := records.CreateTableScan(transaction, "viewCatalog", layout)
-	tableScan.SetString("viewName", viewName)
 
 	for tableScan.Next() {
 		if tableScan.GetString("viewName") == viewName {
@@ -45,11 +44,11 @@ func (v *ViewManager) GetViewDef(
 
 func CreateViewManager(
 	isNew bool,
-	tableManager *TableManger,
+	tableManager *TableManager,
 	transaction *transactions.Transaction,
 ) *ViewManager {
 	viewManager := ViewManager{
-		TableManger: tableManager,
+		TableManager: tableManager,
 	}
 	if isNew {
 		schema := records.CreateSchema()

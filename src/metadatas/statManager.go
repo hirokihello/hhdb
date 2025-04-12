@@ -6,7 +6,7 @@ import (
 )
 
 type StatManager struct {
-	tableManager *TableManger
+	tableManager *TableManager
 	tableStats   map[string]StatInfo
 	numCalls     int
 }
@@ -17,7 +17,7 @@ type StatInfo struct {
 }
 
 func CreateStatManager(
-	tableManager *TableManger,
+	tableManager *TableManager,
 	transaction *transactions.Transaction,
 ) *StatManager {
 	statManager := StatManager{
@@ -32,7 +32,8 @@ func CreateStatManager(
 func (s *StatManager) GetStatInfo(
 	tableName string,
 	layout *records.Layout,
-	transaction *transactions.Transaction) StatInfo {
+	transaction *transactions.Transaction,
+) StatInfo {
 	s.numCalls++
 
 	if s.numCalls > 100 {
@@ -89,14 +90,14 @@ func CreateStatInfo(numBlocks int, numRecords int) StatInfo {
 	}
 }
 
-func (s *StatInfo) blockAccessed() int {
+func (s *StatInfo) BlockAccessed() int {
 	return s.numBlocks
 }
 
-func (s *StatInfo) recordsOutput() int {
+func (s *StatInfo) RecordsOutput() int {
 	return s.numRecords
 }
 
-func (s *StatInfo) distinctValues(fieldName string) int {
+func (s *StatInfo) DistinctValues(fieldName string) int {
 	return 1 + (s.numRecords / 3)
 }
