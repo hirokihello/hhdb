@@ -97,7 +97,7 @@ func (p *Predicate) EquatesWithField(fieldName string) string {
 	return ""
 }
 
-// 動かないので、一旦放置。github を見ても使っている様子がないので、一旦放置する
+// これでいいのかは自信が全くないので、デバッグで真っ先に疑うこと
 func (p *Predicate) ToString() string {
 	if len(p.terms) == 0 {
 		return ""
